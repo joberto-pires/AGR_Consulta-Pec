@@ -27,18 +27,18 @@ func SetupRoutes(db *sql.DB, templates embed.FS) {
 // DB = db
  http.HandleFunc("/clientes", GetClients) 
 
- http.HandleFunc("/clientes", PostClients) 
+ http.HandleFunc("/clientes/New", PostClients) 
 
- http.HandleFunc("/clientes/", FilterClients)
+ http.HandleFunc("/clientes/Filter", FilterClients)
 
- http.HandleFunc("/clientes/", PutClients)
+ http.HandleFunc("/clientes/Edit", PutClients)
 
- http.HandleFunc("/clientes/", DelClients)
+ http.HandleFunc("/clientes/Delete", DelClients)
 }
 
 func GetClients(w http.ResponseWriter, r *http.Request) {
 	 if r.Method == "GET" {
-		 rows, err := DB.Query("Select * from clientes order by clinetes.nome")
+		 rows, err := DB.Query("Select * from clientes order by clientes.nome")
 		 if err != nil {
 			 http.Error(w, err.Error(), http.StatusInternalServerError)
 			 return
@@ -114,7 +114,7 @@ func PutClients(w http.ResponseWriter, r *http.Request) {
 			 telefone := r.FormValue("telefone")
 			 cpfcnpj := r.FormValue("cpf_cnpj")
 
-			 _, err := DB.Exec("UPDATE clientes SET nome=?, email=?, telefone=?, cpf_cnpj=?) where id=?", 
+			 _, err := DB.Exec("UPDATE clientes SET nome=?, email=?, telefone=?, cpf_cnpj=? where id=?", 
 			 nome, email, telefone, cpfcnpj, id)
 			 if err != nil {
 				 http.Error(w, err.Error(), http.StatusInternalServerError)

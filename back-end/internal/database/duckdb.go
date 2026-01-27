@@ -6,17 +6,27 @@ import (
 	_ "github.com/marcboeker/go-duckdb"
 )
 
-func InitDB() (*sql.DB, error) {
- db, err := sql.Open("duckdb","AGRConsultaPec.db")
+type Database struct {
+	*sql.DB
+}
+
+func InitDB(dbPath string) (*Database, error) {
+	connStr := fmt.Sprintf("%s?access_mode=READ_WRITE&threads=4", dbPath)
+ db, err := sql.Open("duckdb",connStr)
  if err != nil {
 	 return nil, err
+ }
+
+ //teste conexão 
+ if err := db.Ping(); err != nil {
+	 return nil, fmt.Errorf("erro ao conectar com o banco: %w", err)
  }
 
  err = createTables(db)
  if err != nil {
 	 return nil, err
  }
- return db, nil
+ return &Database{db}, nil
 }
 
 
@@ -108,4 +118,8 @@ func createTables(db *sql.DB) error {
 		}
 	}
    return nil
+}
+
+func (db *Database) Close() error {
+	return db.DB.Close()
 }
