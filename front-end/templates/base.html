@@ -1,0 +1,56 @@
+<!-- frontend/templates/base.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agro Consultoria - {{.Title}}</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/loading-states.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body hx-ext="loading-states">
+    <div class="app-container">
+<!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-tractor"></i>
+                <h1>AgroConsult</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="/" hx-get="/" hx-target="#main-content" hx-push-url="true">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="/clientes" hx-get="/clientes" hx-target="#main-content" hx-push-url="true">
+                    <i class="fas fa-users"></i> Clientes
+                </a>
+                <a href="/propriedades" hx-get="/propriedades" hx-target="#main-content" hx-push-url="true">
+                    <i class="fas fa-map"></i> Propriedades
+                </a>
+                <a href="/consultas" hx-get="/consultas" hx-target="#main-content" hx-push-url="true">
+                    <i class="fas fa-calendar-check"></i> Consultas
+                </a>
+                <a href="/analises" hx-get="/analises" hx-target="#main-content" hx-push-url="true">
+                    <i class="fas fa-flask"></i> Análises
+                </a>
+                <a href="/relatorios" hx-get="/relatorios" hx-target="#main-content" hx-push-url="true">
+                    <i class="fas fa-chart-bar"></i> Relatórios
+                </a>
+            </nav>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>Consultor</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="main-content">
+            <!-- Content will be loaded here via HTMX -->
+            {{block "content" .}}{{end}}
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

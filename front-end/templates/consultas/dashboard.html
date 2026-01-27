@@ -1,0 +1,102 @@
+<!-- frontend/templates/consultas/dashboard.html -->
+{{define "content"}}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+        <div class="date-filter">
+            <input type="date" class="form-control" style="width: auto;">
+            <span>até</span>
+            <input type="date" class="form-control" style="width: auto;">
+            <button class="btn btn-primary">Filtrar</button>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-users"></i>
+            <div class="stat-value" id="total-clientes">0</div>
+            <div class="stat-label">Clientes Ativos</div>
+        </div>
+        
+        <div class="stat-card">
+            <i class="fas fa-map"></i>
+            <div class="stat-value" id="total-propriedades">0</div>
+            <div class="stat-label">Propriedades</div>
+        </div>
+        
+        <div class="stat-card">
+            <i class="fas fa-calendar-alt"></i>
+            <div class="stat-value" id="consultas-hoje">0</div>
+            <div class="stat-label">Consultas Hoje</div>
+        </div>
+        
+        <div class="stat-card">
+            <i class="fas fa-seedling"></i>
+            <div class="stat-value" id="area-total">0 ha</div>
+            <div class="stat-label">Área Total</div>
+        </div>
+    </div>
+
+    <!-- Consultas Agendadas -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-calendar-check"></i> Próximas Consultas</h3>
+            <button class="btn btn-primary" 
+                    hx-get="/consultas/nova" 
+                    hx-target="#main-content">
+                <i class="fas fa-plus"></i> Nova Consulta
+            </button>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Propriedade</th>
+                        <th>Tipo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="consultas-lista" 
+                      hx-get="/api/consultas/proximas" 
+                      hx-trigger="load">
+                    <!-- Carregado via HTMX -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Análises Pendentes -->
+    <div class="card">
+        <h3><i class="fas fa-flask"></i> Análises Pendentes</h3>
+        <div id="analises-pendentes" 
+             hx-get="/api/analises/pendentes" 
+             hx-trigger="load">
+            Carregando...
+        </div>
+    </div>
+
+    <!-- Gráfico de Produtividade -->
+    <div class="chart-container">
+        <h3><i class="fas fa-chart-line"></i> Produtividade por Cultura</h3>
+        <canvas id="produtividadeChart" width="400" height="200"></canvas>
+    </div>
+</div>
+
+<script>
+// Carregar estatísticas ao abrir o dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    // Buscar estatísticas
+    fetch('/api/estatisticas')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('total-clientes').textContent = data.total_clientes;
+            document.getElementById('total-propriedades').textContent = data.total_propriedades;
+            document.getElementById('consultas-hoje').textContent = data.consultas_hoje;
+            document.getElementById('area-total').textContent = data.area_total + ' ha';
+        });
+});
+</script>
+{{end}}

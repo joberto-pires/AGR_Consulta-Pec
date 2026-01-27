@@ -32,6 +32,8 @@ func SetupRoutes(db *sql.DB, templates embed.FS) {
  http.HandleFunc("/clientes/", FilterClients)
 
  http.HandleFunc("/clientes/", PutClients)
+
+ http.HandleFunc("/clientes/", DelClients)
 }
 
 func GetClients(w http.ResponseWriter, r *http.Request) {
@@ -118,11 +120,28 @@ func PutClients(w http.ResponseWriter, r *http.Request) {
 				 http.Error(w, err.Error(), http.StatusInternalServerError)
 				 return
 			 }
-			 w.Header().Set("HX-Refresh", "true")
-			 w.WriteHeader(http.StatusCreated)
+			 w.WriteHeader(http.StatusOK)
 	}
 }
 
+
+func DelClients(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Path[len("/clientes/"):]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if r.Method == "DELETE" {
+
+			 _, err := DB.Exec("DELETE FROM clientes where id=?", id)
+			 if err != nil {
+				 http.Error(w, err.Error(), http.StatusInternalServerError)
+				 return
+			 }
+			 w.WriteHeader(http.StatusOK)
+	}
+}
 
 
 
