@@ -22,7 +22,7 @@ func main() {
 	log.Printf("📁 Ambiente: %s", env)
 	
 	// Inicializar banco de dados
-	dbPath := "agroconsultoria.db"
+	dbPath := "AGR_Consulta-Pec.db"
 	if customPath := os.Getenv("DB_PATH"); customPath != "" {
 		dbPath = customPath
 	}
@@ -57,7 +57,8 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	
+  app.Routes()	
+
 	server := &http.Server{
 		Addr:         ":" + port,
 		Handler:      app.Routes(),

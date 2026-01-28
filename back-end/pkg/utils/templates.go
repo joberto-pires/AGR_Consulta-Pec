@@ -26,7 +26,7 @@ func LoadTemplates(fs embed.FS) (*template.Template, error) {
 	 }
 	 tmpl := template.New("").Funcs(funcmap)
 
-	 tmpl, err := tmpl.ParseFS(fs, "**/*.html")
+	 tmpl, err := tmpl.ParseFS(fs, "front-end/templates/**/*.html")
 	 if err != nil {
 
 		 return nil, err

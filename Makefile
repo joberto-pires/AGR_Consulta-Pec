@@ -1,17 +1,24 @@
-.PHONY: dev build run clean setup test migrate help
+.PHONY: dev build run clean setup test fix-perms help
 
 BINARY_NAME = agroconsultoria
 BUILD_DIR = bin
-TMP_DIR = tmp
 
-# Configuração inicial do projeto
-setup:
-	@echo "📁 Criando estrutura de diretórios..."
+# Corrigir permissões
+fix-perms:
+	@echo "🔧 Corrigindo permissões..."
+	@chmod +x dev.sh fix-permissions.sh 2>/dev/null || true
+	@rm -rf tmp 2>/dev/null || true
+	@mkdir -p tmp
+	@chmod 755 tmp
+	@echo "✅ Permissões corrigidas"
+
+# Setup inicial
+setup: fix-perms
+	@echo "📁 Criando estrutura..."
 	@mkdir -p front-end/static/{css,js,images}
 	@mkdir -p front-end/templates/{clientes,propriedades,consultas,analises,relatorios,components}
 	@mkdir -p back-end/{cmd,internal/{handlers,database,models,services},pkg/utils}
-	@mkdir -p $(BUILD_DIR) $(TMP_DIR)
-	@echo "✅ Estrutura criada"
+	@mkdir -p $(BUILD_DIR)
 	
 	@if [ ! -f "go.mod" ]; then \
 		echo "📦 Inicializando módulo Go..."; \
@@ -21,66 +28,62 @@ setup:
 	@echo "📥 Instalando dependências..."
 	@go mod tidy
 	@go install github.com/air-verse/air@latest
-	@echo "✨ Configuração concluída!"
+	@echo "✨ Setup concluído!"
 
-# Desenvolvimento com live reload
-dev:
+# Desenvolvimento
+dev: fix-perms
+	@echo "🚀 Iniciando desenvolvimento..."
 	@if ! command -v air &> /dev/null; then \
 		echo "📦 Instalando Air..."; \
 		go install github.com/air-verse/air@latest; \
 	fi
-	@echo "🚀 Iniciando servidor de desenvolvimento..."
 	@air -c .air.toml
 
-# Compilar para produção
+# Build
 build:
-	@echo "🔨 Compilando aplicação..."
+	@echo "🔨 Compilando..."
 	@go build -o $(BUILD_DIR)/$(BINARY_NAME) ./back-end/cmd/main.go
-	@echo "✅ Binário criado: $(BUILD_DIR)/$(BINARY_NAME)"
+	@chmod +x $(BUILD_DIR)/$(BINARY_NAME)
+	@echo "✅ Binário: $(BUILD_DIR)/$(BINARY_NAME)"
 
-# Executar aplicação compilada
+# Executar
 run: build
-	@echo "▶️  Executando aplicação..."
+	@echo "▶️  Executando..."
 	@./$(BUILD_DIR)/$(BINARY_NAME)
 
-# Limpar arquivos temporários
+# Limpar
 clean:
-	@echo "🧹 Limpando arquivos temporários..."
-	@rm -rf $(BUILD_DIR) $(TMP_DIR)
-	@find . -name "*.log" -type f -delete
-#	@find . -name "*.db" -type f -delete
+	@echo "🧹 Limpando..."
+	@rm -rf tmp $(BUILD_DIR) 2>/dev/null || true
+	@find . -name "*.db" -type f -delete 2>/dev/null || true
 	@echo "✅ Limpeza concluída"
 
-# Executar testes
-test:
-	@echo "🧪 Executando testes..."
-	@go test ./back-end/... -v
-
-# Criar banco de dados e tabelas
+# Migrate
 migrate:
-	@echo "🗄️  Criando banco de dados..."
+	@echo "🗄️  Criando banco..."
 	@go run back-end/cmd/migrate.go
 
-# Instalar/atualizar dependências
-deps:
-	@echo "📦 Atualizando dependências..."
-	@go mod tidy
-	@go mod download
+# Testes
+test:
+	@echo "🧪 Testando..."
+	@go test ./back-end/... -v
 
-# Mostrar ajuda
+# Ajuda
 help:
-	@echo "Comandos disponíveis:"
+	@echo "📋 Comandos disponíveis:"
+	@echo "  make fix-perms  - Corrigir permissões (execute primeiro!)"
+	@echo "  make setup      - Configurar projeto completo"
+	@echo "  make dev        - Desenvolvimento com live reload"
+	@echo "  make build      - Compilar para produção"
+	@echo "  make run        - Executar aplicação compilada"
+	@echo "  make clean      - Limpar arquivos temporários"
+	@echo "  make migrate    - Criar banco de dados"
+	@echo "  make test       - Executar testes"
 	@echo ""
-	@echo "  make setup   - Configurar estrutura inicial do projeto"
-	@echo "  make dev     - Iniciar servidor com live reload (Air)"
-	@echo "  make build   - Compilar aplicação para produção"
-	@echo "  make run     - Compilar e executar aplicação"
-	@echo "  make clean   - Limpar arquivos temporários"
-	@echo "  make test    - Executar testes"
-	@echo "  make migrate - Criar banco de dados e tabelas"
-	@echo "  make deps    - Atualizar dependências"
-	@echo "  make help    - Mostrar esta mensagem"
+	@echo "🔧 Solução de problemas:"
+	@echo "  Se tiver erro de permissão, execute: make fix-perms"
+	@echo "  Se Air não funcionar, execute: make setup"
 	@echo ""
-	@echo "Para desenvolvimento, use: make dev ou ./dev.sh"
+	@echo "💡 Dica: Para começar: make setup && make dev"
 
 .DEFAULT_GOAL := help

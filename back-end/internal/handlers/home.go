@@ -17,5 +17,5 @@ func Init(templates embed.FS, db *sql.DB) {
 }
 
 func Homepage(w http.ResponseWriter, r *http.Request) {
-	 Tmpl.ExecuteTemplate(w, "index.html", nil)
+	 Tmpl.ExecuteTemplate(w, "Base.html", nil)
 }

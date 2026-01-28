@@ -1,0 +1,77 @@
+{{define "content"}}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+        <div class="date-filter">
+            <input type="date" class="form-control" id="data-inicio">
+            <span>até</span>
+            <input type="date" class="form-control" id="data-fim">
+            <button class="btn btn-primary" onclick="filtrarDashboard()">
+                <i class="fas fa-filter"></i> Filtrar
+            </button>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="stats-grid" id="estatisticas"
+         hx-get="/api/estatisticas"
+         hx-trigger="load">
+        <!-- Carregado via HTMX -->
+    </div>
+
+    <!-- Próximas Consultas -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-calendar-check"></i> Próximas Consultas</h3>
+            <button class="btn btn-primary"
+                    hx-get="/consultas/nova"
+                    hx-target="#main-content">
+                <i class="fas fa-plus"></i> Nova Consulta
+            </button>
+        </div>
+        <div id="consultas-lista"
+             hx-get="/api/consultas/proximas"
+             hx-trigger="load">
+            <div class="loading" style="margin: 2rem auto;"></div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="card">
+        <h3><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+            <button class="btn btn-secondary"
+                    hx-get="/clientes"
+                    hx-target="#main-content">
+                <i class="fas fa-user-plus"></i> Novo Cliente
+            </button>
+            <button class="btn btn-secondary"
+                    hx-get="/analises/nova"
+                    hx-target="#main-content">
+                <i class="fas fa-flask"></i> Nova Análise
+            </button>
+            <button class="btn btn-accent"
+                    onclick="AgroApp.openModal('<p>Relatório gerado com sucesso!</p>', {title: 'Relatório'})">
+                <i class="fas fa-file-pdf"></i> Gerar Relatório
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function filtrarDashboard() {
+    const inicio = document.getElementById('data-inicio').value;
+    const fim = document.getElementById('data-fim').value;
+    
+    // Atualizar estatísticas com filtro
+    document.getElementById('estatisticas')
+        .setAttribute('hx-vals', JSON.stringify({inicio, fim}))
+        .click();
+    
+    // Atualizar consultas com filtro
+    document.getElementById('consultas-lista')
+        .setAttribute('hx-vals', JSON.stringify({inicio, fim}))
+        .click();
+}
+</script>
+{{end}}
