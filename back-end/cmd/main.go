@@ -57,7 +57,6 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-  app.Routes()	
 
 	server := &http.Server{
 		Addr:         ":" + port,
