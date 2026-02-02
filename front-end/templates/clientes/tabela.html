@@ -1,0 +1,89 @@
+<div class="table-responsive">
+    <table class="agro-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>CPF/CNPJ</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Data Cadastro</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Clientes}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-circle bg-agro-primary text-white me-3">
+                            {{index (split .Nome " ") 0 | firstLetter}}
+                        </div>
+                        <strong>{{.Nome}}</strong>
+                    </div>
+                </td>
+                <td>{{.CpfCnpj}}</td>
+                <td>{{.Telefone}}</td>
+                <td>{{.Email}}</td>
+                <td>{{formatDate .DataCadastro}}</td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a href="/clientes/detalhes?id={{.ID}}" class="btn btn-outline-info" title="Detalhes" hx-boost="true" hx-target="#main-content" hx-push-url="true">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="/clientes/editar?id={{.ID}}" class="btn btn-outline-primary" title="Editar" hx-boost="true" hx-target="#main-content" hx-push-url="true">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-outline-danger" title="Excluir"
+                                hx-delete="/clientes/excluir?id={{.ID}}"
+                                hx-confirm="Tem certeza que deseja excluir este cliente?"
+                                hx-target="#tabela-clientes"
+                                hx-swap="outerHTML">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="fas fa-users fa-2x mb-3"></i>
+                        <p>Nenhum cliente encontrado.</p>
+                    </div>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginação -->
+{{if gt .TotalPaginas 1}}
+<nav aria-label="Paginação" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {{if gt .PaginaAtual 1}}
+        <li class="page-item">
+            <a class="page-link" hx-get="/clientes?pagina={{sub .PaginaAtual 1}}&busca={{.Busca}}" hx-target="#tabela-clientes">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        {{end}}
+
+        {{range $i := iterate 1 .TotalPaginas}}
+        <li class="page-item {{if eq $i $.PaginaAtual}}active{{end}}">
+            <a class="page-link" hx-get="/clientes?pagina={{$i}}&busca={{$.Busca}}" hx-target="#tabela-clientes">{{$i}}</a>
+        </li>
+        {{end}}
+
+        {{if lt .PaginaAtual .TotalPaginas}}
+        <li class="page-item">
+            <a class="page-link" hx-get="/clientes?pagina={{add .PaginaAtual 1}}&busca={{.Busca}}" hx-target="#tabela-clientes">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+        {{end}}
+    </ul>
+</nav>
+{{end}}

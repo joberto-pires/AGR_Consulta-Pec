@@ -1,0 +1,97 @@
+<aside class="sidebar">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="logo d-flex align-items-center gap-2">
+            <i class="fas fa-leaf text-primary" style="font-size: 1.5rem;"></i>
+            <h3 class="mb-0">AgroConsultoria</h3>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary d-md-none" onclick="document.querySelector('.sidebar').classList.remove('mobile-show')">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="mb-4">
+        <button class="btn btn-outline-primary w-100 mb-2" onclick="toggleTheme()">
+            <i class="fas fa-moon me-2"></i> Tema Escuro
+        </button>
+        <div class="text-muted small">
+            <i class="fas fa-circle text-success me-1"></i> Online
+        </div>
+    </div>
+    
+    <nav class="mb-4">
+        <h6 class="text-muted mb-2">PRINCIPAL</h6>
+        <a href="/" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/"}}active{{end}}"
+           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/"}}var(--primary-light){{else}}transparent{{end}};">
+            <i class="fas fa-home me-2"></i> Dashboard
+        </a>
+        
+        <h6 class="text-muted mb-2 mt-4">GESTÃO</h6>
+        <a href="/clientes" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/clientes"}}active{{end}}"
+           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/clientes"}}var(--primary-light){{else}}transparent{{end}};">
+            <i class="fas fa-users me-2"></i> Clientes
+            <span class="badge bg-primary float-end">24</span>
+        </a>
+        <a href="/propriedades" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/propriedades"}}active{{end}}"
+           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/propriedades"}}var(--primary-light){{else}}transparent{{end}};">
+            <i class="fas fa-tractor me-2"></i> Propriedades
+        </a>
+        
+        <h6 class="text-muted mb-2 mt-4">CONSULTORIA</h6>
+        <a href="/consultas" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/consultas"}}active{{end}}"
+           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/consultas"}}var(--primary-light){{else}}transparent{{end}};">
+            <i class="fas fa-calendar-check me-2"></i> Consultas
+            <span class="badge bg-warning float-end">5</span>
+        </a>
+        
+        <h6 class="text-muted mb-2 mt-4">RELATÓRIOS</h6>
+        <a href="/relatorios" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/relatorios"}}active{{end}}"
+           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/relatorios"}}var(--primary-light){{else}}transparent{{end}};">
+            <i class="fas fa-chart-bar me-2"></i> Relatórios
+        </a>
+        <a href="/calendario" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/calendario"}}active{{end}}"
+           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/calendario"}}var(--primary-light){{else}}transparent{{end}};">
+            <i class="fas fa-calendar-alt me-2"></i> Calendário
+        </a>
+    </nav>
+    
+    <div class="mt-auto pt-4 border-top">
+        <div class="small text-muted">
+            <div>Versão: {{.Version}}</div>
+            <div>Ambiente: {{.Env}}</div>
+            <div class="mt-2">
+                <i class="fas fa-circle text-success me-1"></i>
+                Sistema operacional
+            </div>
+        </div>
+    </div>
+</aside>
+
+<style>
+    .sidebar {
+        background: var(--bg-card);
+        border-right: 1px solid var(--border-color);
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 10px;
+    }
+    
+    .bg-primary {
+        background-color: var(--primary) !important;
+    }
+    
+    .bg-warning {
+        background-color: var(--warning) !important;
+        color: #000;
+    }
+    
+    .border-top {
+        border-top-color: var(--border-color) !important;
+    }
+    
+    a:hover {
+        background-color: var(--bg-tertiary) !important;
+    }
+</style>

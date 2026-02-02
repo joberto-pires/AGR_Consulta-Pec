@@ -1,13 +1,13 @@
 package main
 
 import (
-	FS "AGR_Consulta-Pec"
 	"AGR_Consulta-Pec/back-end/internal/database"
 	"AGR_Consulta-Pec/back-end/internal/handlers"
-	"AGR_Consulta-Pec/back-end/pkg/utils"
+	"AGR_Consulta-Pec/back-end/internal/middleware"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -22,7 +22,7 @@ func main() {
 	log.Printf("📁 Ambiente: %s", env)
 	
 	// Inicializar banco de dados
-	dbPath := "AGR_Consulta-Pec.db"
+	dbPath := "AGRConsultaPec.db"
 	if customPath := os.Getenv("DB_PATH"); customPath != "" {
 		dbPath = customPath
 	}
@@ -35,37 +35,68 @@ func main() {
 	
 	log.Printf("🗄️  Banco de dados conectado: %s", dbPath)
 	
-	// Carregar templates
-	tmpl, err := utils.LoadTemplates(FS.TemplatesFS)
+  workingDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("❌ Erro ao carregar templates: %v", err)
+		log.Fatalf("❌ Erro ao obter diretório de trabalho: %v", err)
+	}
+
+	log.Printf("📂 Diretório de trabalho atual: %s", workingDir)
+	
+	templatesPath := filepath.Join(workingDir, "front-end", "templates")
+	staticPath := filepath.Join(workingDir, "front-end", "static")
+	
+	if _, err := os.Stat(templatesPath); os.IsNotExist(err) {
+		parentDir := filepath.Dir(workingDir)
+		templatesPath = filepath.Join(parentDir, "front-end", "templates")
+		staticPath = filepath.Join(parentDir, "front-end", "static")
+		
+		if _, err := os.Stat(templatesPath); os.IsNotExist(err) {
+			grandparentDir := filepath.Dir(parentDir)
+			templatesPath = filepath.Join(grandparentDir, "front-end", "templates")
+			staticPath = filepath.Join(grandparentDir, "front-end", "static")
+		}
 	}
 	
-	log.Printf("📄 Templates carregados: %d", len(tmpl.Templates()))
+	// Log dos caminhos encontrados
+	log.Printf("🔍 Procurando templates em: %s", templatesPath)
 	
+	// Verificar se o diretório existe
+	if _, err := os.Stat(templatesPath); os.IsNotExist(err) {
+		log.Printf("⚠️  Diretório de templates não encontrado: %s", templatesPath)
+	}
+
 	// Configurar handlers
 	app := &handlers.Application{
-		DB:         db.DB,
-		Template:   tmpl,
-		Env:        env,
-		StaticFS:   FS.StaticFS,
-		StartTime:  time.Now(),
+		DB:            db.DB,
+		TemplatesFS:   templatesPath,
+		Env:           env,
+		StaticFS:      staticPath,
+		StartTime:     time.Now(),
 	}
 	
+	err = app.InitTemplates()
+		if err != nil {
+			log.Fatalf("❌ Erro ao inicializar templates: %v", err)
+		}
+		
 	// Configurar servidor HTTP
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	server := &http.Server{
-		Addr:         ":" + port,
-		Handler:      app.Routes(),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	}
-	
+// Criar handler com middlewares
+handler := app.Routes()
+handler = middleware.CacheMiddleware(handler)
+handler = middleware.NoCompressionMiddleware(handler) // Use este em vez de GzipMiddleware
+
+server := &http.Server{
+	Addr:         ":" + port,
+	Handler:      handler,
+	ReadTimeout:  5 * time.Second,   // Reduzido
+	WriteTimeout: 10 * time.Second,  // Reduzido
+	IdleTimeout:  30 * time.Second,
+}
 	log.Printf("🌐 Servidor iniciado em http://localhost:%s", port)
 	log.Printf("📊 Acesse http://localhost:%s/dashboard para começar", port)
 	

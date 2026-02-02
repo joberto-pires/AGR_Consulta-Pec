@@ -1,0 +1,141 @@
+<div class="row">
+    <div class="col-12">
+        <div class="agro-card">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th width="50">ID</th>
+                            <th>Nome</th>
+                            <th>CPF/CNPJ</th>
+                            <th>Telefone</th>
+                            <th>Propriedades</th>
+                            <th width="100" class="text-center">Status</th>
+                            <th width="150" class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Clientes}}
+                        <tr class="align-middle">
+                            <td class="text-muted">#{{.ID}}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle-sm bg-primary text-white me-3">
+                                        {{firstLetter .Nome}}
+                                    </div>
+                                    <div>
+                                        <strong>{{.Nome}}</strong>
+                                        <div class="text-muted small">{{.Email}}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{.CpfCnpj}}</td>
+                            <td>{{.Telefone}}</td>
+                            <td>
+                                <span class="badge bg-soil-light text-soil-dark">
+                                    {{.Propriedades}} propriedade(s)
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success">Ativo</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="/clientes/detalhes?id={{.ID}}"
+                                       class="btn btn-outline-info"
+                                       hx-get="/clientes/detalhes?id={{.ID}}"
+                                       hx-target="#main-content"
+                                       hx-push-url="true"
+                                       hx-swap="innerHTML swap:0.2s"
+                                       title="Detalhes">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/clientes/editar?id={{.ID}}"
+                                       class="btn btn-outline-primary"
+                                       hx-get="/clientes/editar?id={{.ID}}"
+                                       hx-target="#main-content"
+                                       hx-push-url="true"
+                                       hx-swap="innerHTML swap:0.2s"
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-outline-danger"
+                                            hx-delete="/clientes/excluir?id={{.ID}}"
+                                            hx-confirm="Tem certeza que deseja excluir este cliente?"
+                                            hx-target="#clientes-container"
+                                            hx-swap="innerHTML swap:0.2s"
+                                            title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-users fa-3x mb-3"></i>
+                                    <h4>Nenhum cliente encontrado</h4>
+                                    <p class="mb-0">Tente ajustar seus filtros de busca</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+
+            {{if gt .TotalPages 1}}
+            <div class="card-footer">
+                <nav aria-label="Paginação">
+                    <ul class="pagination justify-content-center mb-0">
+                        {{if gt .Page 1}}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               hx-get="/clientes?page={{sub .Page 1}}&search={{.Search}}&status={{.Status}}"
+                               hx-target="#clientes-container"
+                               hx-swap="innerHTML swap:0.2s">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {{end}}
+
+                        {{$page := .Page}}
+                        {{$totalPages := .TotalPages}}
+                        {{$search := .Search}}
+                        {{$status := .Status}}
+                        
+                        {{range $i := seq 1 .TotalPages}}
+                            {{if or (eq $i 1) (eq $i $totalPages) (and (ge $i (sub $page 2)) (le $i (add $page 2)))}}
+                            <li class="page-item {{if eq $i $page}}active{{end}}">
+                                <a class="page-link" 
+                                   hx-get="/clientes?page={{$i}}&search={{$search}}&status={{$status}}"
+                                   hx-target="#clientes-container"
+                                   hx-swap="innerHTML swap:0.2s">
+                                    {{$i}}
+                                </a>
+                            </li>
+                            {{else if or (eq $i (sub $page 3)) (eq $i (add $page 3))}}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            {{end}}
+                        {{end}}
+
+                        {{if lt .Page .TotalPages}}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               hx-get="/clientes?page={{add .Page 1}}&search={{.Search}}&status={{.Status}}"
+                               hx-target="#clientes-container"
+                               hx-swap="innerHTML swap:0.2s">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {{end}}
+                    </ul>
+                </nav>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>

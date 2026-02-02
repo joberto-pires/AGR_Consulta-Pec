@@ -1,0 +1,213 @@
+{{template "base.html" .}}
+
+{{define "content"}}
+<div class="container fade-in">
+    <!-- Dashboard Stats -->
+    <div class="row mb-4">
+        <div class="col-12 col-sm-6 col-md-3 mb-3">
+            <div class="agro-card p-3 text-center">
+                <div class="stat-icon clients mb-2">
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+                <h3 class="mb-1" id="client-count">24</h3>
+                <p class="text-muted mb-0">Clientes Ativos</p>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3 mb-3">
+            <div class="agro-card p-3 text-center">
+                <div class="stat-icon properties mb-2">
+                    <i class="fas fa-tractor fa-2x"></i>
+                </div>
+                <h3 class="mb-1" id="property-count">18</h3>
+                <p class="text-muted mb-0">Propriedades</p>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3 mb-3">
+            <div class="agro-card p-3 text-center">
+                <div class="stat-icon consultations mb-2">
+                    <i class="fas fa-calendar-check fa-2x"></i>
+                </div>
+                <h3 class="mb-1" id="consultation-count">5</h3>
+                <p class="text-muted mb-0">Consultas</p>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3 mb-3">
+            <div class="agro-card p-3 text-center">
+                <div class="stat-icon analysis mb-2">
+                    <i class="fas fa-flask fa-2x"></i>
+                </div>
+                <h3 class="mb-1" id="analysis-count">12</h3>
+                <p class="text-muted mb-0">Análises</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ações Rápidas e Próximas Consultas -->
+    <div class="row mb-4">
+        <div class="col-12 col-md-6 mb-4">
+            <div class="agro-card p-3 h-100">
+                <h3 class="mb-3">Ações Rápidas</h3>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button class="btn btn-primary w-100" 
+                                hx-get="/clientes/novo" 
+                                hx-target="#main-content"
+                                hx-push-url="true">
+                            <i class="fas fa-user-plus me-1"></i> Novo Cliente
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-success w-100"
+                                hx-get="/consultas/novo"
+                                hx-target="#main-content"
+                                hx-push-url="true">
+                            <i class="fas fa-calendar-plus me-1"></i> Nova Consulta
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-secondary w-100"
+                                hx-get="/analises/novo"
+                                hx-target="#main-content"
+                                hx-push-url="true">
+                            <i class="fas fa-flask me-1"></i> Nova Análise
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-secondary w-100"
+                                hx-get="/relatorios/novo"
+                                hx-target="#main-content"
+                                hx-push-url="true">
+                            <i class="fas fa-file-alt me-1"></i> Novo Relatório
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 mb-4">
+            <div class="agro-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0">Próximas Consultas</h3>
+                    <a href="/calendario" class="btn btn-sm btn-outline-primary">
+                        Ver todas
+                    </a>
+                </div>
+                <div id="upcoming-consultations">
+                    <div class="text-center py-4">
+                        <div class="text-muted">
+                            <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                            <p>Nenhuma consulta agendada</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Atividades Recentes e Calendário -->
+    <div class="row">
+        <div class="col-12 col-md-6 mb-4">
+            <div class="agro-card p-3 h-100">
+                <h3 class="mb-3">Atividades Recentes</h3>
+                <div id="recent-activities">
+                    <div class="text-center py-3">
+                        <div class="text-muted">
+                            <i class="fas fa-history fa-2x mb-2"></i>
+                            <p>Nenhuma atividade recente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 mb-4">
+            <div class="agro-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0">Calendário</h3>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary" onclick="showComingSoon()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="btn btn-outline-secondary disabled">
+                            {{now | formatDate "January 2006"}}
+                        </span>
+                        <button class="btn btn-outline-secondary" onclick="showComingSoon()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="mini-calendar">
+                    <div class="text-center py-3">
+                        <div class="text-muted">
+                            <i class="fas fa-calendar fa-2x mb-2"></i>
+                            <p>Calendário em desenvolvimento</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showComingSoon() {
+        alert('Funcionalidade em breve!');
+    }
+</script>
+
+<style>
+    /* Estilos específicos do dashboard */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .agro-card {
+        border-radius: 10px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .agro-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px var(--shadow-color);
+    }
+    
+    .stat-icon.clients { color: var(--primary); }
+    .stat-icon.properties { color: var(--leaf-medium); }
+    .stat-icon.consultations { color: var(--warning); }
+    .stat-icon.analysis { color: var(--info); }
+    
+    .btn {
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+    
+    /* Sidebar mobile */
+    @media (max-width: 768px) {
+        .sidebar.mobile-show {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            z-index: 1000;
+        }
+        
+        .mobile-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+        }
+    }
+</style>
+{{end}}

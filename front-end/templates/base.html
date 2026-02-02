@@ -1,70 +1,140 @@
-<!-- frontend/templates/base.html -->
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{if .Title}}{{.Title}} | {{end}}Agro Consultoria</title>
-    
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/loading-states.js"></script>
+    <title>AgroConsultoria - {{if .Title}}{{.Title}}{{else}}Dashboard{{end}}</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/grid.css">
+    <link rel="stylesheet" href="/static/css/theme.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Favicon -->
-    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6" defer></script>
     
-    <!-- Meta tags -->
-    <meta name="description" content="Sistema de gestão para consultoria agropecuária">
-    <meta name="keywords" content="agropecuária, consultoria, gestão, agricultura, pecuária">
+    <!-- Favicon -->
+    <link rel="icon" href="/static/images/favicon.ico">
+    
+    <style>
+        /* Estilos críticos inline para performance */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 1rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
-<body hx-ext="loading-states">
-    <div class="app-container">
+<body>
+    <div class="dashboard-layout">
         <!-- Sidebar -->
-        {{template "sidebar" .}}
+        {{template "components/sidebar.html" .}}
         
         <!-- Main Content -->
         <main class="main-content" id="main-content">
-            {{template "content" .}}
+            <!-- Header Mobile (só aparece em mobile) -->
+            <div class="mobile-header d-flex d-md-none justify-content-between align-items-center mb-4 p-3 agro-card">
+                <button class="btn btn-outline-primary" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="d-flex align-items-center gap-3">
+                    <button class="theme-toggle btn btn-outline-secondary" onclick="toggleTheme()">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <span class="logo-text">AgroConsultoria</span>
+                </div>
+            </div>
+            
+            {{block "content" .}}{{end}}
         </main>
-        
-        <!-- Loading Overlay -->
-        <div class="loading-overlay">
-            <div class="loading-spinner"></div>
-        </div>
     </div>
     
-    <!-- JavaScript -->
-    <script src="/static/js/app.js"></script>
-    
-    <!-- Inline Scripts -->
+    <!-- Scripts -->
     <script>
-        // Configuração HTMX global
-        document.addEventListener('DOMContentLoaded', function() {
-            // Configurar indicadores de loading
-            htmx.defineExtension('loading-states', {
-                onEvent: function(name, evt) {
-                    if (name === 'htmx:beforeRequest') {
-                        document.querySelector('.loading-overlay').style.display = 'flex';
-                    }
-                    if (name === 'htmx:afterRequest') {
-                        setTimeout(() => {
-                            document.querySelector('.loading-overlay').style.display = 'none';
-                        }, 300);
-                    }
-                }
-            });
+        // Toggle sidebar mobile
+        document.getElementById('menu-toggle')?.addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('mobile-show');
+        });
+        
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             
-            // Ativar navegação ativa
-            const currentPath = window.location.pathname;
-            document.querySelectorAll('.nav-link').forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active');
-                }
-            });
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('agro-theme', newTheme);
+            
+            // Update button icon
+            const icon = document.querySelector('.theme-toggle i');
+            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('agro-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Set correct icon
+            const icon = document.querySelector('.theme-toggle i');
+            if (icon) {
+                icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            
+            // Initialize HTMX
+            if (window.htmx) {
+                // Add request indicator
+                document.body.addEventListener('htmx:beforeRequest', function(evt) {
+                    const target = evt.detail.target;
+                    if (target) {
+                        target.classList.add('htmx-request');
+                    }
+                });
+                
+                document.body.addEventListener('htmx:afterRequest', function(evt) {
+                    const target = evt.detail.target;
+                    if (target) {
+                        target.classList.remove('htmx-request');
+                    }
+                });
+            }
         });
     </script>
 </body>
