@@ -1,66 +1,98 @@
 <aside class="sidebar">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="logo d-flex align-items-center gap-2">
-            <i class="fas fa-leaf text-primary" style="font-size: 1.5rem;"></i>
-            <h3 class="mb-0">AgroConsultoria</h3>
-        </div>
-        <button class="btn btn-sm btn-outline-secondary d-md-none" onclick="document.querySelector('.sidebar').classList.remove('mobile-show')">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-    
-    <div class="mb-4">
-        <button class="btn btn-outline-primary w-100 mb-2" onclick="toggleTheme()">
-            <i class="fas fa-moon me-2"></i> Tema Escuro
-        </button>
-        <div class="text-muted small">
-            <i class="fas fa-circle text-success me-1"></i> Online
+    <div class="sidebar-header">
+        <div class="logo d-flex align-items-center gap-3">
+                <i class="fas fa-leaf"></i>
+            <div>
+                <h3 class="mb-0">AgroConsultoria</h3>
+                <small class="text-muted">Gestão Agropecuária</small>
+            </div>
         </div>
     </div>
     
-    <nav class="mb-4">
-        <h6 class="text-muted mb-2">PRINCIPAL</h6>
-        <a href="/" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/"}}active{{end}}"
-           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/"}}var(--primary-light){{else}}transparent{{end}};">
-            <i class="fas fa-home me-2"></i> Dashboard
-        </a>
+    <div class="sidebar-divider"></div>
+    
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <div class="nav-section-header">
+                <i class="fas fa-home nav-section-icon"></i>
+                <span>Principal</span>
+            </div>
+            <a href="/" class="nav-link {{if eq .CurrentURL "/"}}active{{end}}">
+                <i class="fas fa-chart-line nav-link-icon"></i>
+                <span>Dashboard</span>
+            </a>
+        </div>
         
-        <h6 class="text-muted mb-2 mt-4">GESTÃO</h6>
-        <a href="/clientes" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/clientes"}}active{{end}}"
-           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/clientes"}}var(--primary-light){{else}}transparent{{end}};">
-            <i class="fas fa-users me-2"></i> Clientes
-            <span class="badge bg-primary float-end">24</span>
-        </a>
-        <a href="/propriedades" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/propriedades"}}active{{end}}"
-           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/propriedades"}}var(--primary-light){{else}}transparent{{end}};">
-            <i class="fas fa-tractor me-2"></i> Propriedades
-        </a>
+        <div class="nav-section">
+            <div class="nav-section-header">
+                <i class="fas fa-cogs nav-section-icon"></i>
+                <span>Gestão</span>
+            </div>
+            <a href="/clientes" class="nav-link {{if eq .CurrentURL "/clientes"}}active{{end}}">
+                <i class="fas fa-users nav-link-icon"></i>
+                <span>Clientes</span>
+                <span class="nav-badge">{{if .ClientCount}}{{.ClientCount}}{{else}}24{{end}}</span>
+            </a>
+            <a href="/propriedades" class="nav-link {{if eq .CurrentURL "/propriedades"}}active{{end}}">
+                <i class="fas fa-tractor nav-link-icon"></i>
+                <span>Propriedades</span>
+                <span class="nav-badge">18</span>
+            </a>
+        </div>
         
-        <h6 class="text-muted mb-2 mt-4">CONSULTORIA</h6>
-        <a href="/consultas" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/consultas"}}active{{end}}"
-           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/consultas"}}var(--primary-light){{else}}transparent{{end}};">
-            <i class="fas fa-calendar-check me-2"></i> Consultas
-            <span class="badge bg-warning float-end">5</span>
-        </a>
+        <div class="nav-section">
+            <div class="nav-section-header">
+                <i class="fas fa-clipboard-check nav-section-icon"></i>
+                <span>Consultoria</span>
+            </div>
+            <a href="/consultas" class="nav-link {{if eq .CurrentURL "/consultas"}}active{{end}}">
+                <i class="fas fa-calendar-check nav-link-icon"></i>
+                <span>Consultas</span>
+                <span class="nav-badge badge-warning">5</span>
+            </a>
+            <a href="/analises" class="nav-link {{if eq .CurrentURL "/analises"}}active{{end}}">
+                <i class="fas fa-flask nav-link-icon"></i>
+                <span>Análises</span>
+                <span class="nav-badge">12</span>
+            </a>
+        </div>
         
-        <h6 class="text-muted mb-2 mt-4">RELATÓRIOS</h6>
-        <a href="/relatorios" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/relatorios"}}active{{end}}"
-           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/relatorios"}}var(--primary-light){{else}}transparent{{end}};">
-            <i class="fas fa-chart-bar me-2"></i> Relatórios
-        </a>
-        <a href="/calendario" class="d-block py-2 px-3 mb-1 rounded {{if eq .CurrentURL "/calendario"}}active{{end}}"
-           style="text-decoration: none; color: inherit; background: {{if eq .CurrentURL "/calendario"}}var(--primary-light){{else}}transparent{{end}};">
-            <i class="fas fa-calendar-alt me-2"></i> Calendário
-        </a>
+        <div class="nav-section">
+            <div class="nav-section-header">
+                <i class="fas fa-chart-bar nav-section-icon"></i>
+                <span>Relatórios</span>
+            </div>
+            <a href="/relatorios" class="nav-link {{if eq .CurrentURL "/relatorios"}}active{{end}}">
+                <i class="fas fa-file-chart-line nav-link-icon"></i>
+                <span>Relatórios</span>
+            </a>
+            <a href="/calendario" class="nav-link {{if eq .CurrentURL "/calendario"}}active{{end}}">
+                <i class="fas fa-calendar-alt nav-link-icon"></i>
+                <span>Calendário</span>
+            </a>
+        </div>
     </nav>
     
-    <div class="mt-auto pt-4 border-top">
-        <div class="small text-muted">
-            <div>Versão: {{.Version}}</div>
-            <div>Ambiente: {{.Env}}</div>
-            <div class="mt-2">
-                <i class="fas fa-circle text-success me-1"></i>
-                Sistema operacional
+    <div class="sidebar-footer">
+        <div class="sidebar-footer-section">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small">Sistema</span>
+                <span class="badge bg-success small">Online</span>
+            </div>
+            <div class="text-muted small mb-1">
+                <i class="fas fa-code-branch me-1"></i> Versão: {{.Version}}
+            </div>
+            <div class="text-muted small">
+                <i class="fas fa-server me-1"></i> Ambiente: {{.Env}}
+            </div>
+        </div>
+        
+        <div class="sidebar-footer-actions">
+            <button class="btn" onclick="toggleTheme()">
+                <i class="fas fa-moon me-2"></i>
+            </button>
+            <div class="text-center small text-muted">
+                &copy; {{.Year}} AgroConsultoria
             </div>
         </div>
     </div>
@@ -68,30 +100,143 @@
 
 <style>
     .sidebar {
+        display: flex;
+        flex-direction: column;
         background: var(--bg-card);
         border-right: 1px solid var(--border-color);
     }
     
-    .badge {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.4rem;
+    .sidebar-header {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
     }
     
-    .bg-primary {
-        background-color: var(--primary) !important;
+    .sidebar-divider {
+        height: 1px;
+        background: var(--border-color);
+        margin: 0 1rem;
     }
     
-    .bg-warning {
-        background-color: var(--warning) !important;
-        color: #000;
+    .sidebar-nav {
+        flex: 1;
+        padding: 1rem 0;
+        overflow-y: auto;
     }
     
-    .border-top {
-        border-top-color: var(--border-color) !important;
+    .nav-section {
+        margin-bottom: 1.5rem;
     }
     
-    a:hover {
-        background-color: var(--bg-tertiary) !important;
+    .nav-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1rem;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+    }
+    
+    .nav-section-icon {
+        font-size: 0.9rem;
+        opacity: 0.7;
+    }
+    
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        border-left: 3px solid transparent;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .nav-link:hover {
+        background: var(--bg-tertiary);
+        color: var(--primary);
+        border-left-color: var(--primary-light);
+    }
+    
+    .nav-link.active {
+        background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.1) 0%, transparent 100%);
+        color: var(--primary);
+        border-left-color: var(--primary);
+        font-weight: 500;
+    }
+    
+    .nav-link-icon {
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+        opacity: 0.8;
+    }
+    
+    .nav-badge {
+        margin-left: auto;
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        min-width: 24px;
+        text-align: center;
+    }
+    
+    .badge-warning {
+        background: var(--warning) !important;
+        color: #000 !important;
+    }
+    
+    .sidebar-footer {
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+    }
+    
+    .sidebar-footer-section {
+        margin-bottom: 1rem;
+    }
+    
+    .sidebar-footer-actions {
+        margin-top: 1rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 280px;
+        }
+        
+        .mobile-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .mobile-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
     }
 </style>

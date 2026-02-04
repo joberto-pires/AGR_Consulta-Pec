@@ -15,7 +15,7 @@
   
   --primary: #2d8c3c;
   --primary-dark: #1e6b2c;
-  --primary-light: #a5d6a7;
+/*  --primary-light: #a5d6a7; */
   
   --success: #28a745;
   --warning: #ffc107;
@@ -28,6 +28,19 @@
   --leaf-light: #a5d6a7;
   --leaf-medium: #4caf50;
   --leaf-dark: #2e7d32;
+
+    --primary-rgb: 45, 140, 60; /* RGB para o primary */
+    --success-rgb: 40, 167, 69;
+    --warning-rgb: 255, 193, 7;
+    --info-rgb: 23, 162, 184;
+    --danger-rgb: 220, 53, 69;
+    
+    /* Cores claras para backgrounds */
+    --primary-light: rgba(var(--primary-rgb), 0.1);
+    --success-light: rgba(var(--success-rgb), 0.1);
+    --warning-light: rgba(var(--warning-rgb), 0.1);
+    --info-light: rgba(var(--info-rgb), 0.1);
+    --danger-light: rgba(var(--danger-rgb), 0.1);  
 }
 
 [data-theme="dark"] {
@@ -46,7 +59,7 @@
   
   --primary: #4caf50;
   --primary-dark: #2e7d32;
-  --primary-light: #a5d6a7;
+ /* --primary-light: #a5d6a7;*/
   
   --success: #28a745;
   --warning: #ffc107;
@@ -59,6 +72,12 @@
   --leaf-light: #2e7d32;
   --leaf-medium: #4caf50;
   --leaf-dark: #a5d6a7;
+
+    --primary-light: rgba(var(--primary-rgb), 0.15);
+    --success-light: rgba(var(--success-rgb), 0.15);
+    --warning-light: rgba(var(--warning-rgb), 0.15);
+    --info-light: rgba(var(--info-rgb), 0.15);
+    --danger-light: rgba(var(--danger-rgb), 0.15);
 }
 
 /* Aplicar variáveis */

@@ -1,146 +1,282 @@
 {{template "base.html" .}}
 
 {{define "content"}}
-<div class="container fade-in">
-    <!-- Dashboard Stats -->
-    <div class="row mb-4">
-        <div class="col-12 col-sm-6 col-md-3 mb-3">
-            <div class="agro-card p-3 text-center">
-                <div class="stat-icon clients mb-2">
-                    <i class="fas fa-users fa-2x"></i>
-                </div>
-                <h3 class="mb-1" id="client-count">24</h3>
-                <p class="text-muted mb-0">Clientes Ativos</p>
+<div class="container-fluid fade-in">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="dashboard-title mb-1">Dashboard</h1>
+                <p class="dashboard-subtitle text-muted">Visão geral do sistema de gestão agropecuária</p>
             </div>
-        </div>
-        <div class="col-12 col-sm-6 col-md-3 mb-3">
-            <div class="agro-card p-3 text-center">
-                <div class="stat-icon properties mb-2">
-                    <i class="fas fa-tractor fa-2x"></i>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-end gap-3">
+                    <div class="dashboard-date">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        <span id="current-date">{{now | formatDate "02/01/2006"}}</span>
+                    </div>
+                    <div class="dashboard-status">
+                        <i class="fas fa-circle text-success me-1"></i>
+                        <span class="small">Online</span>
+                    </div>
                 </div>
-                <h3 class="mb-1" id="property-count">18</h3>
-                <p class="text-muted mb-0">Propriedades</p>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-md-3 mb-3">
-            <div class="agro-card p-3 text-center">
-                <div class="stat-icon consultations mb-2">
-                    <i class="fas fa-calendar-check fa-2x"></i>
-                </div>
-                <h3 class="mb-1" id="consultation-count">5</h3>
-                <p class="text-muted mb-0">Consultas</p>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-md-3 mb-3">
-            <div class="agro-card p-3 text-center">
-                <div class="stat-icon analysis mb-2">
-                    <i class="fas fa-flask fa-2x"></i>
-                </div>
-                <h3 class="mb-1" id="analysis-count">12</h3>
-                <p class="text-muted mb-0">Análises</p>
             </div>
         </div>
     </div>
     
-    <!-- Ações Rápidas e Próximas Consultas -->
-    <div class="row mb-4">
-        <div class="col-12 col-md-6 mb-4">
-            <div class="agro-card p-3 h-100">
-                <h3 class="mb-3">Ações Rápidas</h3>
-                <div class="row g-2">
-                    <div class="col-6">
-                        <button class="btn btn-primary w-100" 
-                                hx-get="/clientes/novo" 
-                                hx-target="#main-content"
-                                hx-push-url="true">
-                            <i class="fas fa-user-plus me-1"></i> Novo Cliente
-                        </button>
-                    </div>
-                    <div class="col-6">
-                        <button class="btn btn-success w-100"
-                                hx-get="/consultas/novo"
-                                hx-target="#main-content"
-                                hx-push-url="true">
-                            <i class="fas fa-calendar-plus me-1"></i> Nova Consulta
-                        </button>
-                    </div>
-                    <div class="col-6">
-                        <button class="btn btn-secondary w-100"
-                                hx-get="/analises/novo"
-                                hx-target="#main-content"
-                                hx-push-url="true">
-                            <i class="fas fa-flask me-1"></i> Nova Análise
-                        </button>
-                    </div>
-                    <div class="col-6">
-                        <button class="btn btn-secondary w-100"
-                                hx-get="/relatorios/novo"
-                                hx-target="#main-content"
-                                hx-push-url="true">
-                            <i class="fas fa-file-alt me-1"></i> Novo Relatório
-                        </button>
-                    </div>
+    <!-- Dashboard Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stats-card stats-card-primary">
+                <div class="stats-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-content">
+                    <h3 class="stats-number" id="client-count">24</h3>
+                    <p class="stats-label">Clientes Ativos</p>
+                </div>
+                <div class="stats-trend">
+                    <i class="fas fa-arrow-up text-success"></i>
+                    <span class="text-success small">12%</span>
                 </div>
             </div>
         </div>
-        
-        <div class="col-12 col-md-6 mb-4">
-            <div class="agro-card p-3 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="mb-0">Próximas Consultas</h3>
-                    <a href="/calendario" class="btn btn-sm btn-outline-primary">
+        <div class="col-6 col-md-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-icon">
+                    <i class="fas fa-tractor"></i>
+                </div>
+                <div class="stats-content">
+                    <h3 class="stats-number" id="property-count">18</h3>
+                    <p class="stats-label">Propriedades</p>
+                </div>
+                <div class="stats-trend">
+                    <i class="fas fa-arrow-up text-success"></i>
+                    <span class="text-success small">8%</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stats-content">
+                    <h3 class="stats-number" id="consultation-count">5</h3>
+                    <p class="stats-label">Consultas Hoje</p>
+                </div>
+                <div class="stats-trend">
+                    <i class="fas fa-clock text-warning"></i>
+                    <span class="text-warning small">2 pendentes</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stats-card stats-card-info">
+                <div class="stats-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <div class="stats-content">
+                    <h3 class="stats-number" id="analysis-count">12</h3>
+                    <p class="stats-label">Análises</p>
+                </div>
+                <div class="stats-trend">
+                    <i class="fas fa-exclamation-circle text-danger"></i>
+                    <span class="text-danger small">3 urgentes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content Grid -->
+    <div class="row g-4">
+        <!-- Ações Rápidas -->
+        <div class="col-12 col-lg-6">
+            <div class="card card-hover">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-bolt text-primary me-2"></i>
+                        Ações Rápidas
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6 col-sm-3">
+                            <a href="/clientes/novo" class="quick-action-btn" 
+                               hx-get="/clientes/novo"
+                               hx-target="#main-content"
+                               hx-push-url="true">
+                                <div class="quick-action-icon bg-primary-light">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <span class="quick-action-label">Novo Cliente</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <a href="/clientes/novo" class="quick-action-btn" 
+                               hx-get="/clientes/novo"
+                               hx-target="#main-content"
+                               hx-push-url="true">
+                                <div class="quick-action-icon bg-success-light">
+                                    <i class="fas fa-calendar-plus"></i>
+                                </div>
+                                <span class="quick-action-label">Nova Consulta</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <a href="/clientes/novo" class="quick-action-btn" 
+                               hx-get="/clientes/novo"
+                               hx-target="#main-content"
+                               hx-push-url="true">
+                                <div class="quick-action-icon bg-warning-light">
+                                    <i class="fas fa-flask"></i>
+                                </div>
+                                <span class="quick-action-label">Nova Análise</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <a href="/clientes/novo" class="quick-action-btn" 
+                               hx-get="/clientes/novo"
+                               hx-target="#main-content"
+                               hx-push-url="true">
+                                <div class="quick-action-icon bg-info-light">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <span class="quick-action-label">Novo Relatório</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Atividades Recentes -->
+            <div class="card card-hover mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-history text-primary me-2"></i>
+                        Atividades Recentes
+                    </h3>
+                    <a href="#" class="btn btn-sm btn-outline-primary" onclick="showComingSoon()">
                         Ver todas
                     </a>
                 </div>
-                <div id="upcoming-consultations">
-                    <div class="text-center py-4">
-                        <div class="text-muted">
-                            <i class="fas fa-calendar-alt fa-2x mb-2"></i>
-                            <p>Nenhuma consulta agendada</p>
+                <div class="card-body">
+                    <div id="recent-activities">
+                        <div class="activity-item">
+                            <div class="activity-icon bg-primary">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1">Novo cliente cadastrado</h6>
+                                <p class="text-muted small mb-0">João Silva foi cadastrado no sistema</p>
+                                <span class="activity-time">Há 10 minutos</span>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Atividades Recentes e Calendário -->
-    <div class="row">
-        <div class="col-12 col-md-6 mb-4">
-            <div class="agro-card p-3 h-100">
-                <h3 class="mb-3">Atividades Recentes</h3>
-                <div id="recent-activities">
-                    <div class="text-center py-3">
-                        <div class="text-muted">
-                            <i class="fas fa-history fa-2x mb-2"></i>
-                            <p>Nenhuma atividade recente</p>
+                        <div class="activity-item">
+                            <div class="activity-icon bg-success">
+                                <i class="fas fa-tractor"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1">Propriedade atualizada</h6>
+                                <p class="text-muted small mb-0">Fazenda Santa Maria teve dados atualizados</p>
+                                <span class="activity-time">Há 45 minutos</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon bg-warning">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1">Consulta agendada</h6>
+                                <p class="text-muted small mb-0">Visita técnica agendada para amanhã</p>
+                                <span class="activity-time">Há 2 horas</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-12 col-md-6 mb-4">
-            <div class="agro-card p-3 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="mb-0">Calendário</h3>
+        <!-- Próximas Consultas e Calendário -->
+        <div class="col-12 col-lg-6">
+            <!-- Próximas Consultas -->
+            <div class="card card-hover">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-calendar-check text-success me-2"></i>
+                        Próximas Consultas
+                    </h3>
+                    <a href="/calendario" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-calendar-alt me-1"></i> Calendário
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div id="upcoming-consultations">
+                        <div class="consultation-item">
+                            <div class="consultation-date bg-success">
+                                <span class="day">15</span>
+                                <span class="month">Out</span>
+                            </div>
+                            <div class="consultation-content">
+                                <h6 class="mb-1">Visita Técnica - Fazenda São João</h6>
+                                <p class="text-muted small mb-0">
+                                    <i class="fas fa-clock me-1"></i> 09:00 - 12:00
+                                    <i class="fas fa-map-marker-alt ms-3 me-1"></i> Santa Maria
+                                </p>
+                                <div class="consultation-tags">
+                                    <span class="badge bg-success-light text-success">Análise de Solo</span>
+                                    <span class="badge bg-warning-light text-warning">Pendente</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="consultation-item">
+                            <div class="consultation-date bg-primary">
+                                <span class="day">18</span>
+                                <span class="month">Out</span>
+                            </div>
+                            <div class="consultation-content">
+                                <h6 class="mb-1">Reunião com Cliente - Agropecuária Silva</h6>
+                                <p class="text-muted small mb-0">
+                                    <i class="fas fa-clock me-1"></i> 14:00 - 15:30
+                                    <i class="fas fa-map-marker-alt ms-3 me-1"></i> Escritório
+                                </p>
+                                <div class="consultation-tags">
+                                    <span class="badge bg-primary-light text-primary">Planejamento</span>
+                                    <span class="badge bg-success-light text-success">Confirmado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mini Calendário -->
+            <div class="card card-hover mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt text-info me-2"></i>
+                        Calendário
+                    </h3>
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-secondary" onclick="showComingSoon()">
+                        <button class="btn btn-outline-secondary" onclick="changeMonth(-1)">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <span class="btn btn-outline-secondary disabled">
-                            {{now | formatDate "January 2006"}}
+                        <span class="btn btn-outline-secondary disabled" id="current-month">
+                            Outubro 2023
                         </span>
-                        <button class="btn btn-outline-secondary" onclick="showComingSoon()">
+                        <button class="btn btn-outline-secondary" onclick="changeMonth(1)">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
                 </div>
-                <div id="mini-calendar">
-                    <div class="text-center py-3">
-                        <div class="text-muted">
-                            <i class="fas fa-calendar fa-2x mb-2"></i>
-                            <p>Calendário em desenvolvimento</p>
+                <div class="card-body">
+                    <div id="mini-calendar">
+                        <!-- Calendário será carregado via JS -->
+                        <div class="calendar-placeholder">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <p class="text-muted small mt-2">Carregando calendário...</p>
                         </div>
                     </div>
                 </div>
@@ -149,65 +285,439 @@
     </div>
 </div>
 
-<script>
-    function showComingSoon() {
-        alert('Funcionalidade em breve!');
-    }
-</script>
-
+<!-- CSS Específico do Dashboard -->
 <style>
-    /* Estilos específicos do dashboard */
-    .fade-in {
-        animation: fadeIn 0.5s ease-in;
+    .dashboard-header {
+        padding: 1.5rem 0;
     }
     
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+    .dashboard-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
     }
     
-    .agro-card {
-        border-radius: 10px;
-        transition: transform 0.2s, box-shadow 0.2s;
+    .dashboard-subtitle {
+        font-size: 1rem;
+        opacity: 0.8;
     }
     
-    .agro-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px var(--shadow-color);
-    }
-    
-    .stat-icon.clients { color: var(--primary); }
-    .stat-icon.properties { color: var(--leaf-medium); }
-    .stat-icon.consultations { color: var(--warning); }
-    .stat-icon.analysis { color: var(--info); }
-    
-    .btn {
-        border-radius: 6px;
+    .dashboard-date {
+        background: var(--bg-secondary);
         padding: 0.5rem 1rem;
+        border-radius: 8px;
         font-weight: 500;
-        transition: all 0.2s;
     }
     
-    .btn:hover {
-        transform: translateY(-1px);
+    /* Cards de Estatísticas */
+    .stats-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
     
-    /* Sidebar mobile */
+    .stats-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-card-primary {
+        border-left: 4px solid var(--primary);
+    }
+    
+    .stats-card-success {
+        border-left: 4px solid var(--success);
+    }
+    
+    .stats-card-warning {
+        border-left: 4px solid var(--warning);
+    }
+    
+    .stats-card-info {
+        border-left: 4px solid var(--info);
+    }
+    
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .stats-card-primary .stats-icon {
+        background: var(--primary);
+    }
+    
+    .stats-card-success .stats-icon {
+        background: var(--success);
+    }
+    
+    .stats-card-warning .stats-icon {
+        background: var(--warning);
+    }
+    
+    .stats-card-info .stats-icon {
+        background: var(--info);
+    }
+    
+    .stats-content {
+        flex: 1;
+    }
+    
+    .stats-number {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        line-height: 1;
+    }
+    
+    .stats-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 0;
+    }
+    
+    .stats-trend {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    /* Cards Gerais */
+    .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .card-header {
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-primary);
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    /* Ações Rápidas */
+    .quick-action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem 0.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    
+    .quick-action-btn:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--border-color);
+        transform: translateY(-2px);
+    }
+    
+    .quick-action-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .bg-primary-light { background: rgba(var(--primary-rgb), 0.1); color: var(--primary); }
+    .bg-success-light { background: rgba(var(--success-rgb), 0.1); color: var(--success); }
+    .bg-warning-light { background: rgba(var(--warning-rgb), 0.1); color: var(--warning); }
+    .bg-info-light { background: rgba(var(--info-rgb), 0.1); color: var(--info); }
+    
+    .quick-action-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-align: center;
+    }
+    
+    /* Atividades Recentes */
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-time {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+        display: block;
+    }
+    
+    /* Consultas */
+    .consultation-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .consultation-item:last-child {
+        border-bottom: none;
+    }
+    
+    .consultation-date {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .consultation-date .day {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .consultation-date .month {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        opacity: 0.9;
+    }
+    
+    .consultation-tags {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+    
+    /* Calendário Placeholder */
+    .calendar-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        color: var(--text-muted);
+    }
+    
+    /* Responsividade */
     @media (max-width: 768px) {
-        .sidebar.mobile-show {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 250px;
-            height: 100vh;
-            z-index: 1000;
+        .dashboard-title {
+            font-size: 1.5rem;
         }
         
-        .mobile-header {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
+        .stats-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem 1rem;
+        }
+        
+        .stats-icon {
+            margin-bottom: 1rem;
+        }
+        
+        .stats-trend {
+            position: relative;
+            top: auto;
+            right: auto;
+            margin-top: 0.5rem;
+        }
+        
+        .quick-action-btn {
+            padding: 0.75rem 0.25rem;
         }
     }
 </style>
+
+<!-- JavaScript para funcionalidades do Dashboard -->
+<script>
+    function showComingSoon() {
+        // Criar um toast/notificação moderna
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i class="fas fa-info-circle me-2"></i>
+                <span>Funcionalidade em desenvolvimento!</span>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        // Estilo do toast
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--info);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 350px;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Remover automaticamente após 5 segundos
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+    
+    function changeMonth(delta) {
+        const monthElement = document.getElementById('current-month');
+        const months = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+        
+        // Simples mudança de mês
+        const currentText = monthElement.textContent;
+        const [currentMonth, currentYear] = currentText.split(' ');
+        let monthIndex = months.indexOf(currentMonth);
+        let year = parseInt(currentYear);
+        
+        monthIndex += delta;
+        
+        if (monthIndex < 0) {
+            monthIndex = 11;
+            year--;
+        } else if (monthIndex > 11) {
+            monthIndex = 0;
+            year++;
+        }
+        
+        monthElement.textContent = `${months[monthIndex]} ${year}`;
+    }
+    
+    // Atualizar data atual
+    function updateCurrentDate() {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateElement = document.getElementById('current-date');
+        if (dateElement) {
+            dateElement.textContent = now.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCurrentDate();
+        
+        // Inicializar tooltips
+        document.querySelectorAll('[title]').forEach(element => {
+            element.addEventListener('mouseenter', function(e) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = this.title;
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: var(--bg-card);
+                    color: var(--text-primary);
+                    padding: 0.5rem 0.75rem;
+                    border-radius: 6px;
+                    font-size: 0.875rem;
+                    border: 1px solid var(--border-color);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    z-index: 1000;
+                    white-space: nowrap;
+                `;
+                
+                const rect = this.getBoundingClientRect();
+                tooltip.style.top = (rect.bottom + 5) + 'px';
+                tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+                tooltip.style.transform = 'translateX(-50%)';
+                
+                document.body.appendChild(tooltip);
+                this.tooltip = tooltip;
+            });
+            
+            element.addEventListener('mouseleave', function() {
+                if (this.tooltip) {
+                    this.tooltip.remove();
+                    this.tooltip = null;
+                }
+            });
+        });
+    });
+</script>
 {{end}}

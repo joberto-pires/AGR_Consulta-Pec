@@ -1,35 +1,305 @@
-<header class="header">
-    <div class="logo">
-        <img src="/static/images/logo.svg" alt="AgroConsultoria" class="logo-img">
-        <span class="logo-text">AgroConsultoria</span>
-    </div>
-
-   <button class="theme-toggle" id="theme-toggle" title="Alternar tema">
-        <i class="fas fa-moon"></i>
-    </button> 
-
-    <div class="header-actions">
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" placeholder="Buscar clientes, propriedades..." 
-                   hx-get="/search"
-                   hx-trigger="keyup changed delay:500ms"
-                   hx-target="#search-results"
-                   hx-swap="outerHTML">
+<div class="header">
+    <div class="header-left">
+        <div class="header-logo">
+            <i class="fas fa-leaf text-primary me-2"></i>
+            <span class="header-logo-text">AgroConsultoria</span>
         </div>
+    </div>
+    
+    <div class="header-center">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" 
+                   class="search-input" 
+                   placeholder="Buscar clientes, propriedades, consultas..."
+                   onfocus="this.placeholder = ''"
+                   onblur="this.placeholder = 'Buscar clientes, propriedades, consultas...'">
+            <button class="search-clear" style="display: none;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="header-right">
+        <button class="header-action theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+            <i class="fas fa-moon"></i>
+        </button>
         
-        <div class="user-menu">
+        <div class="header-user">
             <div class="user-avatar">
                 <i class="fas fa-user-circle"></i>
             </div>
-            <span class="user-name">Consultor</span>
-            <div class="dropdown">
-                <a href="/profile"><i class="fas fa-user"></i> Perfil</a>
-                <a href="/settings"><i class="fas fa-cog"></i> Configurações</a>
-                <a href="/logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            <div class="user-info">
+                <span class="user-name">Consultor</span>
+                <span class="user-role">Administrador</span>
+            </div>
+            <div class="user-dropdown">
+                <a href="/profile" class="dropdown-item">
+                    <i class="fas fa-user"></i>
+                    <span>Meu Perfil</span>
+                </a>
+                <a href="/settings" class="dropdown-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="/logout" class="dropdown-item text-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </a>
             </div>
         </div>
     </div>
-</header>
+</div>
 
-<div id="search-results" class="search-results"></div>
+<style>
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        height: 70px;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+    
+    .header-left {
+        flex: 0 0 auto;
+    }
+    
+    .header-logo {
+        display: flex;
+        align-items: center;
+    }
+    
+    .header-logo-text {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    
+    .header-center {
+        flex: 1;
+        max-width: 500px;
+        margin: 0 2rem;
+    }
+    
+    .search-container {
+        position: relative;
+        width: 100%;
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 3rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+    }
+    
+    .search-clear {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+    }
+    
+    .search-clear:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+    
+    .header-right {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .header-action {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .header-action:hover {
+        background: var(--bg-tertiary);
+        transform: translateY(-1px);
+    }
+    
+    .header-user {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    
+    .header-user:hover {
+        background: var(--bg-secondary);
+    }
+    
+    .header-user:hover .user-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+    
+    .user-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .user-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+    }
+    
+    .user-role {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+    
+    .user-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        min-width: 200px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        padding: 0.5rem 0;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.2s ease;
+        z-index: 100;
+    }
+    
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: background 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+        background: var(--bg-secondary);
+    }
+    
+    .dropdown-divider {
+        height: 1px;
+        background: var(--border-color);
+        margin: 0.5rem 0;
+    }
+    
+    .text-danger {
+        color: var(--danger) !important;
+    }
+    
+    @media (max-width: 992px) {
+        .header-center {
+            display: none;
+        }
+        
+        .header-user .user-info {
+            display: none;
+        }
+        
+        .header {
+            padding: 0 1rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .header-action {
+            width: 36px;
+            height: 36px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
+        }
+    }
+</style>
+
+<script>
+    // Controle do input de busca
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('.search-input');
+        const searchClear = document.querySelector('.search-clear');
+        
+        if (searchInput && searchClear) {
+            searchInput.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    searchClear.style.display = 'block';
+                } else {
+                    searchClear.style.display = 'none';
+                }
+            });
+            
+            searchClear.addEventListener('click', function() {
+                searchInput.value = '';
+                searchInput.focus();
+                this.style.display = 'none';
+            });
+        }
+    });
+</script>
