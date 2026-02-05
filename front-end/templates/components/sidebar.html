@@ -28,7 +28,7 @@
                 <i class="fas fa-cogs nav-section-icon"></i>
                 <span>Gestão</span>
             </div>
-            <a href="/clientes" class="nav-link {{if eq .CurrentURL "/clientes"}}active{{end}}">
+            <a href="/clientes" hx-get="/clientes" hx-target="#main-content" hx-push-url="true" class="nav-link {{if eq .CurrentURL "/clientes"}}active{{end}}">
                 <i class="fas fa-users nav-link-icon"></i>
                 <span>Clientes</span>
                 <span class="nav-badge">{{if .ClientCount}}{{.ClientCount}}{{else}}24{{end}}</span>

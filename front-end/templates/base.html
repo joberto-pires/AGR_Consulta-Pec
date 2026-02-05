@@ -8,85 +8,69 @@
     <!-- CSS -->
     <link rel="stylesheet" href="/static/css/grid.css">
     <link rel="stylesheet" href="/static/css/theme.css">
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.6" defer></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     
     <!-- Favicon -->
     <link rel="icon" href="/static/images/favicon.ico">
     
     <style>
-        /* Estilos críticos inline para performance */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Estilos críticos inline */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
             background: var(--bg-primary);
             color: var(--text-primary);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
         
         .dashboard-layout {
             display: flex;
             min-height: 100vh;
-            position: relative;
         }
         
         .sidebar {
             width: 250px;
             background: var(--bg-card);
             border-right: 1px solid var(--border-color);
-            padding: 1rem;
             height: 100vh;
             overflow-y: auto;
             position: fixed;
             left: 0;
             top: 0;
             z-index: 100;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .main-content {
             flex: 1;
             margin-left: 250px;
-            padding: 1rem;
             min-height: 100vh;
             background: var(--bg-primary);
+            padding: 1rem;
         }
         
-        /* Overlay para mobile */
         .sidebar-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
             z-index: 99;
         }
         
-        .sidebar-overlay.active {
-            display: block;
-        }
+        .sidebar-overlay.active { display: block; }
         
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
-                z-index: 100;
+                transition: transform 0.3s;
             }
             
             .sidebar.mobile-show {
                 transform: translateX(0);
-                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
             }
             
             .main-content {
@@ -95,24 +79,20 @@
             }
         }
         
-        /* Animações suaves */
+        /* Animações */
         .fade-in {
             animation: fadeIn 0.4s ease-out;
         }
         
-        .slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-        
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        @keyframes slideIn {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        /* HTMX loading */
+        .htmx-request { opacity: 0.7; }
+        .htmx-indicator { opacity: 0; transition: opacity 0.2s; }
+        .htmx-request .htmx-indicator { opacity: 1; }
     </style>
 </head>
 <body>
@@ -132,7 +112,7 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <div class="mobile-title">AgroConsultoria</div>
-                    <button class="theme-toggle btn btn-outline-secondary" onclick="toggleTheme()">
+                    <button class="theme-toggle btn btn-outline-secondary">
                         <i class="fas fa-moon"></i>
                     </button>
                 </div>
@@ -142,122 +122,7 @@
         </main>
     </div>
     
-    <!-- Scripts -->
-    <script>
-        // Toggle sidebar mobile
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        
-        if (menuToggle) {
-            menuToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('mobile-show');
-                sidebarOverlay.classList.toggle('active');
-                document.body.style.overflow = sidebar.classList.contains('mobile-show') ? 'hidden' : '';
-            });
-        }
-        
-        // Fechar sidebar ao clicar no overlay ou botão de fechar
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', function() {
-                sidebar.classList.remove('mobile-show');
-                sidebarOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            });
-        }
-        
-        // Fechar sidebar ao clicar no botão de fechar
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.sidebar-close')) {
-                sidebar.classList.remove('mobile-show');
-                if (sidebarOverlay) {
-                    sidebarOverlay.classList.remove('active');
-                }
-                document.body.style.overflow = '';
-            }
-        });
-        
-        // Theme toggle
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('agro-theme', newTheme);
-            
-            // Update button icon
-            const icons = document.querySelectorAll('.theme-toggle i');
-            icons.forEach(icon => {
-                icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            });
-            
-            // Dispatch event for other components
-            document.dispatchEvent(new CustomEvent('themechange', { 
-                detail: { theme: newTheme } 
-            }));
-        }
-        
-        // Load saved theme
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('agro-theme');
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            let theme = 'light';
-            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-                theme = 'dark';
-            }
-            
-            document.documentElement.setAttribute('data-theme', theme);
-            
-            // Set correct icon
-            const icons = document.querySelectorAll('.theme-toggle i');
-            icons.forEach(icon => {
-                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            });
-            
-            // Initialize HTMX
-            if (window.htmx) {
-                // Add request indicator
-                document.body.addEventListener('htmx:beforeRequest', function(evt) {
-                    const target = evt.detail.target;
-                    if (target) {
-                        target.classList.add('htmx-request');
-                    }
-                });
-                
-                document.body.addEventListener('htmx:afterRequest', function(evt) {
-                    const target = evt.detail.target;
-                    if (target) {
-                        target.classList.remove('htmx-request');
-                    }
-                });
-            }
-            
-            // Hide/show mobile header based on screen size
-            function updateMobileHeader() {
-                const mobileHeader = document.querySelector('.mobile-header');
-                if (window.innerWidth <= 768) {
-                    if (mobileHeader) mobileHeader.style.display = 'block';
-                } else {
-                    if (mobileHeader) mobileHeader.style.display = 'none';
-                }
-            }
-            
-            updateMobileHeader();
-            window.addEventListener('resize', updateMobileHeader);
-        });
-        
-        // Close sidebar on escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                sidebar.classList.remove('mobile-show');
-                if (sidebarOverlay) {
-                    sidebarOverlay.classList.remove('active');
-                }
-                document.body.style.overflow = '';
-            }
-        });
-    </script>
+    <!-- JavaScript Principal -->
+    <script src="/static/js/main.js"></script>
 </body>
 </html>

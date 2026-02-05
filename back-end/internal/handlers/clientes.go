@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -123,8 +124,8 @@ func (app *Application) FormCliente(w http.ResponseWriter, r *http.Request) {
             return
         }
 
-        row := app.DB.QueryRow("SELECT id, nome, email, telefone, cpf_cnpj, endereco, cidade, estado, observacoes FROM clientes WHERE id = ?", id)
-        err = row.Scan(&cliente.ID, &cliente.Nome, &cliente.Email, &cliente.Telefone, &cliente.CpfCnpj, &cliente.Endereco, &cliente.Cidade, &cliente.Estado, &cliente.Observacoes)
+        row := app.DB.QueryRow("SELECT id, nome, email, telefone, cpf_cnpj FROM clientes WHERE id = ?", id)
+        err = row.Scan(&cliente.ID, &cliente.Nome, &cliente.Email, &cliente.Telefone, &cliente.CpfCnpj)
         if err != nil && err != sql.ErrNoRows {
             app.serverError(w, r, err)
             return
@@ -143,7 +144,12 @@ func (app *Application) FormCliente(w http.ResponseWriter, r *http.Request) {
         "Title":   title,
     }
 
-    app.renderTemplate(w, r, "clientes/formulario.html", data)
+  log.Printf("🔍 DEBUG: FormCliente chamado, renderizando clientes/formulario.html")
+ if r.Header.Get("HX-Request") == "true" {
+        app.renderTemplate(w, r, "clientes/formulario_ajax.html", data)
+    } else {
+        app.renderTemplate(w, r, "clientes/formulario.html", data)
+ }
 }
 
 func (app *Application) SalvarCliente(w http.ResponseWriter, r *http.Request) {
@@ -166,8 +172,8 @@ func (app *Application) SalvarCliente(w http.ResponseWriter, r *http.Request) {
     if id == "" {
         // Inserir novo cliente
         _, err = app.DB.Exec(
-            "INSERT INTO clientes (nome, email, telefone, cpf_cnpj, endereco, cidade, estado, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            nome, email, telefone, cpfCnpj, endereco, cidade, estado, observacoes,
+            "INSERT INTO clientes (nome, email, telefone, cpf_cnpj, endereco, cidade, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            nome, email, telefone, cpfCnpj, endereco, cidade, observacoes,
         )
     } else {
         // Atualizar cliente existente

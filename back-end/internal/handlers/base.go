@@ -162,26 +162,64 @@ func (app *Application) ReloadTemplates() error {
 }
 
 func (app *Application) Routes() http.Handler {
-  mux := http.NewServeMux()
-	
-	// Servir arquivos estáticos
-	fs := http.FileServer(http.Dir(app.StaticFS))
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-	
-	// Rotas da aplicação
-	mux.HandleFunc("/", app.Homepage)
-  mux.HandleFunc("/clientes", app.ListaClientes)
-  mux.HandleFunc("/clientes/novo", app.FormCliente)
-  mux.HandleFunc("/clientes/editar", app.FormCliente)
-  mux.HandleFunc("/clientes/salvar", app.SalvarCliente)
-  mux.HandleFunc("/clientes/detalhes", app.DetalhesCliente)
-  mux.HandleFunc("/clientes/excluir", app.ExcluirCliente)	
-	// Rota para recarregar templates em desenvolvimento
-	if app.Env == "development" {
-		mux.HandleFunc("/reload-templates", app.ReloadTemplatesHandler)
-	}
-	
-	return app.logRequest(mux)
+    mux := http.NewServeMux()
+    
+    // Servir arquivos estáticos com tipos MIME corretos
+    mux.Handle("/static/", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // Extrair a extensão do arquivo
+        ext := filepath.Ext(r.URL.Path)
+        
+        // Definir Content-Type baseado na extensão
+        switch ext {
+        case ".css":
+            w.Header().Set("Content-Type", "text/css; charset=utf-8")
+        case ".js":
+            w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+        case ".json":
+            w.Header().Set("Content-Type", "application/json; charset=utf-8")
+        case ".png":
+            w.Header().Set("Content-Type", "image/png")
+        case ".jpg", ".jpeg":
+            w.Header().Set("Content-Type", "image/jpeg")
+        case ".gif":
+            w.Header().Set("Content-Type", "image/gif")
+        case ".svg":
+            w.Header().Set("Content-Type", "image/svg+xml")
+        case ".ico":
+            w.Header().Set("Content-Type", "image/x-icon")
+        case ".html", ".htm":
+            w.Header().Set("Content-Type", "text/html; charset=utf-8")
+        default:
+            w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+        }
+        
+        // Desabilitar cache em desenvolvimento
+        if app.Env == "development" {
+            w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+            w.Header().Set("Pragma", "no-cache")
+            w.Header().Set("Expires", "0")
+        }
+        
+        // Servir o arquivo
+        fs := http.FileServer(http.Dir(app.StaticFS))
+        fs.ServeHTTP(w, r)
+    })))
+    
+    // Resto das rotas...
+    mux.HandleFunc("/", app.Homepage)
+    mux.HandleFunc("/clientes", app.ListaClientes)
+    mux.HandleFunc("/clientes/novo", app.FormCliente)
+    mux.HandleFunc("/clientes/editar", app.FormCliente)
+    mux.HandleFunc("/clientes/salvar", app.SalvarCliente)
+    mux.HandleFunc("/clientes/detalhes", app.DetalhesCliente)
+    mux.HandleFunc("/clientes/excluir", app.ExcluirCliente)
+    
+    // Rota para recarregar templates em desenvolvimento
+    if app.Env == "development" {
+        mux.HandleFunc("/reload-templates", app.ReloadTemplatesHandler)
+    }
+    
+    return app.logRequest(mux)
 }
 
 func (app *Application) logRequest(next http.Handler) http.Handler {
@@ -215,48 +253,53 @@ func (app *Application) Homepage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) renderTemplate(w http.ResponseWriter, r *http.Request, name string, data any) {
-	app.templatesLock.RLock()
-	tmpl := app.templates
-	app.templatesLock.RUnlock()
-	
-	if tmpl == nil {
-		http.Error(w, "Templates não inicializados", http.StatusInternalServerError)
-		return
-	}
-	
-	// Dados comuns para todos os templates
-	templateData := map[string]interface{}{
-		"Data":       data,
-		"Env":        app.Env,
-		"CurrentURL": r.URL.Path,
-		"Year":       time.Now().Year(),
-		"Version":    "1.0.0",
-	}
-	
-	// Mesclar com dados específicos
-	if dataMap, ok := data.(map[string]interface{}); ok {
-		for k, v := range dataMap {
-			templateData[k] = v
-		}
-	}
-	
-	// IMPORTANTE: Definir charset UTF-8 explicitamente
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	
-	// Executar template
-	err := tmpl.ExecuteTemplate(w, name, templateData)
-	if err != nil {
-		log.Printf("❌ Erro ao executar template %s: %v", name, err)
-		
-		// Fallback simples
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		if app.Env == "development" {
-			w.Write([]byte("Template Error: " + err.Error()))
-		} else {
-			w.Write([]byte("Erro ao carregar página"))
-		}
-	}
+    app.templatesLock.RLock()
+    tmpl := app.templates
+    app.templatesLock.RUnlock()
+    
+    if tmpl == nil {
+        http.Error(w, "Templates não inicializados", http.StatusInternalServerError)
+        return
+    }
+    
+    // Dados comuns para todos os templates
+    templateData := map[string]interface{}{
+        "Data":       data,
+        "Env":        app.Env,
+        "CurrentURL": r.URL.Path,
+        "Year":       time.Now().Year(),
+        "Version":    "1.0.0",
+    }
+    
+    // Mesclar com dados específicos
+    if dataMap, ok := data.(map[string]interface{}); ok {
+        for k, v := range dataMap {
+            templateData[k] = v
+        }
+    }
+    
+    // IMPORTANTE: Para requisições HTMX, NÃO usar base.html
+    // Verificar se é requisição HTMX
+    if r.Header.Get("HX-Request") == "true" {
+        // Para HTMX, renderizar apenas o template específico sem a base
+        w.Header().Set("Content-Type", "text/html; charset=utf-8")
+        err := tmpl.ExecuteTemplate(w, name, templateData)
+        if err != nil {
+            log.Printf("❌ Erro ao executar template %s (HTMX): %v", name, err)
+            http.Error(w, "Erro ao renderizar template", http.StatusInternalServerError)
+        }
+        return
+    }
+    
+    // Para requisições normais, usar a base normalmente
+    w.Header().Set("Content-Type", "text/html; charset=utf-8")
+    err := tmpl.ExecuteTemplate(w, "base.html", templateData)
+    if err != nil {
+        log.Printf("❌ Erro ao executar template base.html: %v", err)
+        http.Error(w, "Erro ao carregar página", http.StatusInternalServerError)
+    }
 }
+
 func (app *Application) serverError(w http.ResponseWriter, r *http.Request, err error) {
 	log.Printf("❌ Server Error: %s %s - %v", r.Method, r.URL.Path, err)
 	

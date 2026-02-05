@@ -39,6 +39,10 @@ func createTables(db *sql.DB) error {
             email VARCHAR(100),
             telefone VARCHAR(20),
             cpf_cnpj VARCHAR(20),
+						endereco VARCHAR(80),
+						estado   VARCHAR(03),
+						cidade   VARCHAR(80),
+						observacoes VARCHAR(200),
             data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`,
 

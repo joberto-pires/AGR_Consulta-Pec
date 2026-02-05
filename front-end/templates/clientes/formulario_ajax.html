@@ -1,0 +1,100 @@
+<!-- Conteúdo AJAX para HTMX - Sem base.html -->
+<div class="container-fluid fade-in">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h2 mb-0">{{.Title}}</h1>
+                <a href="/clientes" class="btn btn-secondary"
+                   hx-get="/clientes"
+                   hx-target="#main-content"
+                   hx-push-url="true">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" action="/clientes/salvar"
+                          hx-post="/clientes/salvar"
+                          hx-target="#main-content"
+                          hx-push-url="true">
+                        
+                        <input type="hidden" name="id" value="{{.Cliente.ID}}">
+                        
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Nome Completo *</label>
+                                <input type="text" class="form-control" name="nome" 
+                                       value="{{.Cliente.Nome}}" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">CPF/CNPJ *</label>
+                                <input type="text" class="form-control" name="cpf_cnpj" 
+                                       value="{{.Cliente.CpfCnpj}}" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Telefone *</label>
+                                <input type="tel" class="form-control" name="telefone" 
+                                       value="{{.Cliente.Telefone}}" required>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">E-mail</label>
+                                <input type="email" class="form-control" name="email" 
+                                       value="{{.Cliente.Email}}">
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">Endereço</label>
+                                <input type="text" class="form-control" name="endereco" 
+                                       value="{{.Cliente.Endereco}}">
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <label class="form-label">Cidade</label>
+                                <input type="text" class="form-control" name="cidade" 
+                                       value="{{.Cliente.Cidade}}">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" name="estado">
+                                    <option value="">Selecione...</option>
+                                    {{range .Estados}}
+                                    <option value="{{.}}" {{if eq . $.Cliente.Estado}}selected{{end}}>
+                                        {{.}}
+                                    </option>
+                                    {{end}}
+                                </select>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">Observações</label>
+                                <textarea class="form-control" name="observacoes" rows="3">{{.Cliente.Observacoes}}</textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-3 mt-4">
+                            <button type="button" class="btn btn-outline-secondary"
+                                    hx-get="/clientes"
+                                    hx-target="#main-content"
+                                    hx-push-url="true">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {{if .Cliente.ID}}Atualizar Cliente{{else}}Cadastrar Cliente{{end}}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
