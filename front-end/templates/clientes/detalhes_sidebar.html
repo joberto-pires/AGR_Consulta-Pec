@@ -1,0 +1,220 @@
+<!-- front-end/templates/clientes/detalhes_sidebar.html -->
+<div class="container-fluid">
+    <!-- Cabeçalho compacto -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="avatar-circle-lg bg-primary text-white">
+                {{index (split .Cliente.Nome " ") 0 | firstLetter}}
+            </div>
+            <div>
+                <h4 class="mb-1">{{.Cliente.Nome}}</h4>
+                <p class="text-muted mb-0">{{.Cliente.CpfCnpj | formatCPFCNPJ}}</p>
+            </div>
+        </div>
+        
+        <!-- Botões de ação -->
+        <div class="d-flex gap-2 mb-4">
+            <a href="/clientes/editar?id={{.Cliente.ID}}" 
+               class="btn btn-outline-primary flex-fill"
+               onclick="openSidebar('Editar Cliente', '/clientes/editar?id={{.Cliente.ID}}'); return false;">
+                <i class="fas fa-edit me-2"></i>Editar
+            </a>
+            <button class="btn btn-outline-danger"
+                    onclick="openConfirmModal(
+                        'Excluir Cliente',
+                        'Tem certeza que deseja excluir o cliente {{.Cliente.Nome}}?',
+                        () => {
+                            htmx.ajax('DELETE', '/clientes/excluir?id={{.Cliente.ID}}', {
+                                target: '#clientes-container',
+                                swap: 'innerHTML'
+                            });
+                        }
+                    )">
+                <i class="fas fa-trash me-2"></i>Excluir
+            </button>
+        </div>
+    </div>
+    
+    <!-- Informações em cards -->
+    <div class="row g-3">
+        <!-- Informações de Contato -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-address-card me-2"></i>Informações de Contato
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">E-mail</label>
+                            <p class="mb-0">{{.Cliente.Email}}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Telefone</label>
+                            <p class="mb-0">{{.Cliente.Telefone | formatPhone}}</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted">Endereço</label>
+                            <p class="mb-0">{{.Cliente.Endereco}}<br>
+                               {{.Cliente.Cidade}} - {{.Cliente.Estado}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Observações -->
+        {{if .Cliente.Observacoes}}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-sticky-note me-2"></i>Observações
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{.Cliente.Observacoes}}</p>
+                </div>
+            </div>
+        </div>
+        {{end}}
+        
+        <!-- Propriedades -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tractor me-2"></i>Propriedades
+                    </h5>
+                    <a href="/propriedades/novo?cliente_id={{.Cliente.ID}}" 
+                       class="btn btn-sm btn-primary"
+                       onclick="openSidebar('Nova Propriedade', '/propriedades/novo?cliente_id={{.Cliente.ID}}'); return false;">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    {{if .Propriedades}}
+                    <div class="list-group list-group-flush">
+                        {{range .Propriedades}}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{.Nome}}</h6>
+                                    <p class="text-muted mb-0 small">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{.Municipio}} - {{.Estado}}
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-ruler-combined me-1"></i>{{.Hectares}} ha
+                                    </p>
+                                </div>
+                                <a href="/propriedades/detalhes?id={{.ID}}"
+                                   class="btn btn-sm btn-outline-info"
+                                   onclick="openSidebar('Detalhes da Propriedade', '/propriedades/detalhes?id={{.ID}}'); return false;">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                    {{else}}
+                    <div class="text-center py-3">
+                        <i class="fas fa-tractor fa-2x text-muted mb-3"></i>
+                        <p class="text-muted mb-3">Nenhuma propriedade cadastrada</p>
+                        <a href="/propriedades/novo?cliente_id={{.Cliente.ID}}" 
+                           class="btn btn-sm btn-outline-primary"
+                           onclick="openSidebar('Nova Propriedade', '/propriedades/novo?cliente_id={{.Cliente.ID}}'); return false;">
+                            <i class="fas fa-plus me-2"></i>Cadastrar Propriedade
+                        </a>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informações do sistema -->
+    <div class="mt-4 pt-4 border-top">
+        <div class="row g-2">
+            <div class="col-6">
+                <small class="text-muted">ID</small>
+                <p class="mb-0">#{{.Cliente.ID}}</p>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Cadastrado em</small>
+                <p class="mb-0">{{.Cliente.DataCadastro.Format "02/01/2006"}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos específicos para sidebar */
+    .avatar-circle-lg {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+    
+    .card {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        background: var(--bg-surface);
+        margin-bottom: 1rem;
+    }
+    
+    .card-header {
+        background: var(--bg-tertiary);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .list-group-item {
+        background: transparent;
+        border-color: var(--border-color);
+        padding: 0.75rem 0;
+    }
+    
+    .list-group-item:first-child {
+        border-top: none;
+    }
+    
+    .form-label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+    
+    .btn {
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        transition: all var(--transition-fast);
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .flex-fill {
+        flex: 1;
+    }
+</style>

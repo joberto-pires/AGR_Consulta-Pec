@@ -40,18 +40,47 @@ func (app *Application) ListaClientes(w http.ResponseWriter, r *http.Request) {
     offset := (pagina - 1) * limite
 
     busca := r.URL.Query().Get("busca")
+    ordenarPor := r.URL.Query().Get("ordenar_por")
+    direcao := r.URL.Query().Get("direcao")
+
+    // Valores padrão para ordenação
+    if ordenarPor == "" {
+        ordenarPor = "id"
+    }
+    if direcao == "" {
+        direcao = "DESC"
+    }
+
+    // Validar colunas para evitar SQL injection
+    colunasValidas := map[string]bool{
+        "id":            true,
+        "nome":          true,
+        "email":         true,
+        "telefone":      true,
+        "cpf_cnpj":      true,
+        "data_cadastro": true,
+    }
+    
+    if !colunasValidas[ordenarPor] {
+        ordenarPor = "id"
+    }
+    
+    // Validar direção
+    if direcao != "ASC" && direcao != "DESC" {
+        direcao = "DESC"
+    }
 
     // Construir a query
     query := "SELECT id, nome, email, telefone, cpf_cnpj, data_cadastro FROM clientes"
     args := []interface{}{}
 
     if busca != "" {
-        query += " WHERE nome LIKE ? OR cpf_cnpj LIKE ? OR email LIKE ?"
+        query += " WHERE nome LIKE ? OR cpf_cnpj LIKE ? OR email LIKE ? OR telefone LIKE ?"
         likeBusca := "%" + busca + "%"
-        args = append(args, likeBusca, likeBusca, likeBusca)
+        args = append(args, likeBusca, likeBusca, likeBusca, likeBusca)
     }
 
-    query += " ORDER BY id DESC LIMIT ? OFFSET ?"
+    query += " ORDER BY " + ordenarPor + " " + direcao + " LIMIT ? OFFSET ?"
     args = append(args, limite, offset)
 
     // Executar a query
@@ -77,8 +106,8 @@ func (app *Application) ListaClientes(w http.ResponseWriter, r *http.Request) {
     countQuery := "SELECT COUNT(*) FROM clientes"
     countArgs := []interface{}{}
     if busca != "" {
-        countQuery += " WHERE nome LIKE ? OR cpf_cnpj LIKE ? OR email LIKE ?"
-        countArgs = append(countArgs, "%"+busca+"%", "%"+busca+"%", "%"+busca+"%")
+        countQuery += " WHERE nome LIKE ? OR cpf_cnpj LIKE ? OR email LIKE ? OR telefone LIKE ?"
+        countArgs = append(countArgs, "%"+busca+"%", "%"+busca+"%", "%"+busca+"%", "%"+busca+"%")
     }
 
     var total int
@@ -93,15 +122,22 @@ func (app *Application) ListaClientes(w http.ResponseWriter, r *http.Request) {
         totalPaginas++
     }
 
+    // Calcular páginas para mostrar
+    paginas := calcularPaginacao(pagina, totalPaginas)
+
     data := map[string]interface{}{
-        "Clientes":     clientes,
-        "PaginaAtual":  pagina,
-        "TotalPaginas": totalPaginas,
-        "Busca":        busca,
-        "Title":        "Clientes",
+        "Clientes":       clientes,
+        "PaginaAtual":    pagina,
+        "TotalPaginas":   totalPaginas,
+        "TotalRegistros": total,
+        "Busca":          busca,
+        "OrdenarPor":     ordenarPor,
+        "Direcao":        direcao,
+        "Paginas":        paginas,
+        "Title":          "Clientes",
     }
 
-    // Se for uma requisição HTMX (busca ou paginação), renderizar apenas a tabela
+    // Se for uma requisição HTMX (busca, paginação ou ordenação), renderizar apenas a tabela
     if r.Header.Get("HX-Request") == "true" {
         app.renderTemplate(w, r, "clientes/tabela.html", data)
         return
@@ -111,6 +147,30 @@ func (app *Application) ListaClientes(w http.ResponseWriter, r *http.Request) {
     app.renderTemplate(w, r, "clientes/lista.html", data)
 }
 
+func calcularPaginacao(paginaAtual, totalPaginas int) []int {
+    // Mostrar no máximo 5 páginas
+    var paginas []int
+    
+    inicio := paginaAtual - 2
+    if inicio < 1 {
+        inicio = 1
+    }
+    
+    fim := inicio + 4
+    if fim > totalPaginas {
+        fim = totalPaginas
+        inicio = fim - 4
+        if inicio < 1 {
+            inicio = 1
+        }
+    }
+    
+    for i := inicio; i <= fim; i++ {
+        paginas = append(paginas, i)
+    }
+    
+    return paginas
+}
 func (app *Application) FormCliente(w http.ResponseWriter, r *http.Request) {
     // Verificar se é edição
     idStr := r.URL.Query().Get("id")
@@ -145,11 +205,7 @@ func (app *Application) FormCliente(w http.ResponseWriter, r *http.Request) {
     }
 
   log.Printf("🔍 DEBUG: FormCliente chamado, renderizando clientes/formulario.html")
-// if r.Header.Get("HX-Request") == "true" {
-//        app.renderTemplate(w, r, "clientes/formulario_ajax.html", data)
-//    } else {
-        app.renderTemplate(w, r, "clientes/formulario.html", data)
-// }
+        app.renderTemplate(w, r, "clientes/editar_sidebar.html", data)
 }
 
 func (app *Application) SalvarCliente(w http.ResponseWriter, r *http.Request) {
@@ -289,7 +345,7 @@ func (app *Application) DetalhesCliente(w http.ResponseWriter, r *http.Request) 
         "Title":         "Detalhes do Cliente",
     }
 
-    app.renderTemplate(w, r, "clientes/detalhes.html", data)
+    app.renderTemplate(w, r, "clientes/detalhes_sidebar.html", data)
 }
 
 // ExcluirCliente exclui um cliente
@@ -311,7 +367,7 @@ func (app *Application) ExcluirCliente(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    _, err = app.DB.Exec("DELETE FROM clientes WHERE id = ?", id)
+    _, err = app.DB.Exec("DELETE FROM clientes WHERE id = ?;", id)
     if err != nil {
         app.serverError(w, r, err)
         return

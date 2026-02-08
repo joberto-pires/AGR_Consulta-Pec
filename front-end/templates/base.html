@@ -10,7 +10,10 @@
     <link rel="stylesheet" href="/static/css/theme.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">    
+    <link rel="stylesheet" href="/static/css/animations.css">    
+
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     
@@ -18,8 +21,12 @@
     <link rel="icon" href="/static/images/favicon.ico">
     
     <style>
-        /* Estilos críticos inline */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Estilos críticos inline para performance */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -50,7 +57,7 @@
             margin-left: 250px;
             min-height: 100vh;
             background: var(--bg-primary);
-            padding: 1rem;
+            padding: 1.5rem;
         }
         
         .sidebar-overlay {
@@ -66,7 +73,7 @@
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
-                transition: transform 0.3s;
+                transition: transform 0.3s ease;
             }
             
             .sidebar.mobile-show {
@@ -76,6 +83,7 @@
             .main-content {
                 margin-left: 0;
                 width: 100%;
+                padding: 1rem;
             }
         }
         
@@ -107,12 +115,12 @@
         <main class="main-content" id="main-content">
             <!-- Header Mobile -->
             <div class="mobile-header" style="display: none;">
-                <div class="mobile-nav">
-                    <button class="btn btn-outline-primary" id="menu-toggle">
+                <div class="mobile-nav d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <button class="btn btn-outline-secondary" id="menu-toggle">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <div class="mobile-title">AgroConsultoria</div>
-                    <button class="theme-toggle btn btn-outline-secondary">
+                    <div class="mobile-title fw-bold">AgroConsultoria</div>
+                    <button class="theme-toggle btn btn-outline-secondary" onclick="window.toggleTheme()">
                         <i class="fas fa-moon"></i>
                     </button>
                 </div>
@@ -122,7 +130,556 @@
         </main>
     </div>
     
-    <!-- JavaScript Principal -->
-    <script src="/static/js/main.js"></script>
+    <!-- Scripts -->
+    <script>
+        // Gerenciamento de estado do tema
+        const ThemeManager = {
+            init() {
+                this.loadTheme();
+                this.bindEvents();
+                this.updateMobileHeader();
+            },
+            
+            loadTheme() {
+                const savedTheme = localStorage.getItem('agro-theme');
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                let theme = 'light';
+                if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                    theme = 'dark';
+                }
+                
+                document.documentElement.setAttribute('data-theme', theme);
+                this.updateThemeIcon(theme);
+            },
+            
+            toggleTheme() {
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('agro-theme', newTheme);
+                this.updateThemeIcon(newTheme);
+            },
+            
+            updateThemeIcon(theme) {
+                const icons = document.querySelectorAll('.theme-toggle i');
+                icons.forEach(icon => {
+                    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+                });
+            },
+            
+            bindEvents() {
+                // Botões de toggle
+                document.querySelectorAll('.theme-toggle').forEach(btn => {
+                    btn.addEventListener('click', () => this.toggleTheme());
+                });
+                
+                // Menu mobile
+                const menuToggle = document.getElementById('menu-toggle');
+                const sidebar = document.querySelector('.sidebar');
+                const sidebarOverlay = document.getElementById('sidebar-overlay');
+                
+                if (menuToggle && sidebar) {
+                    menuToggle.addEventListener('click', () => {
+                        sidebar.classList.toggle('mobile-show');
+                        if (sidebarOverlay) {
+                            sidebarOverlay.classList.toggle('active');
+                        }
+                        document.body.style.overflow = sidebar.classList.contains('mobile-show') ? 'hidden' : '';
+                    });
+                }
+                
+                if (sidebarOverlay) {
+                    sidebarOverlay.addEventListener('click', () => {
+                        sidebar.classList.remove('mobile-show');
+                        sidebarOverlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                }
+                
+                // Fechar com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        sidebar?.classList.remove('mobile-show');
+                        sidebarOverlay?.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+                
+                // Resize
+                window.addEventListener('resize', () => this.updateMobileHeader());
+            },
+            
+            updateMobileHeader() {
+                const mobileHeader = document.querySelector('.mobile-header');
+                if (mobileHeader) {
+                    mobileHeader.style.display = window.innerWidth <= 768 ? 'block' : 'none';
+                }
+            }
+        };
+        
+        // HTMX Configuration
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar tema
+            ThemeManager.init();
+            
+            // Configurar HTMX
+            if (window.htmx) {
+                htmx.config.defaultSwapStyle = 'innerHTML';
+                htmx.config.defaultSwapDelay = 0;
+                htmx.config.scrollIntoViewOnBoost = true;
+                
+                // Adicionar classe durante requisições
+                document.body.addEventListener('htmx:beforeRequest', (e) => {
+                    const target = e.detail.target;
+                    if (target) {
+                        target.classList.add('htmx-request');
+                    }
+                });
+                
+                document.body.addEventListener('htmx:afterRequest', (e) => {
+                    const target = e.detail.target;
+                    if (target) {
+                        target.classList.remove('htmx-request');
+                    }
+                });
+                
+                // Executar scripts em conteúdo carregado via HTMX
+                document.body.addEventListener('htmx:afterSwap', (e) => {
+                    if (e.detail.target.id === 'main-content') {
+                        // Re-inicializar componentes
+                        ThemeManager.updateMobileHeader();
+                        
+                        // Inicializar campos de formulário
+                        const cpfCnpjInput = document.getElementById('cpf_cnpj');
+                        const telefoneInput = document.getElementById('telefone');
+                        
+                        if (cpfCnpjInput) {
+                            cpfCnpjInput.addEventListener('input', formatarDocumento);
+                        }
+                        
+                        if (telefoneInput) {
+                            telefoneInput.addEventListener('input', formatarTelefone);
+                        }
+                    }
+                });
+            }
+        });
+        
+        // Funções de formatação
+        function formatarDocumento(e) {
+            const input = e.target || e;
+            let valor = input.value.replace(/\D/g, '');
+            
+            if (valor.length <= 11) {
+                valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+                valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+                valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            } else {
+                valor = valor.replace(/^(\d{2})(\d)/, '$1.$2');
+                valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                valor = valor.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+            }
+            
+            input.value = valor;
+        }
+        
+        function formatarTelefone(e) {
+            const input = e.target || e;
+            let valor = input.value.replace(/\D/g, '');
+            
+            if (valor.length === 11) {
+                valor = valor.replace(/^(\d{2})(\d)/, '($1) $2');
+                valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+            } else if (valor.length === 10) {
+                valor = valor.replace(/^(\d{2})(\d)/, '($1) $2');
+                valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+            } else if (valor.length > 2) {
+                valor = valor.replace(/^(\d{2})(\d)/, '($1) $2');
+            }
+            
+            input.value = valor;
+        }
+        
+        // Expor funções globalmente
+        window.toggleTheme = () => ThemeManager.toggleTheme();
+        window.formatarDocumento = formatarDocumento;
+        window.formatarTelefone = formatarTelefone;
+    </script>
+<!-- Modal/Sidebar Container -->
+<div id="modal-container" class="modal-container">
+  <div class="modal-overlay" id="modal-overlay"></div>
+  
+  <!-- Sidebar para Detalhes/Edição -->
+  <div id="sidebar" class="sidebar-modal">
+    <div class="sidebar-header">
+      <h3 id="sidebar-title"></h3>
+      <button class="sidebar-close" onclick="closeSidebar()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="sidebar-body" id="sidebar-body">
+      <!-- Conteúdo carregado via HTMX -->
+    </div>
+    <div class="sidebar-footer" id="sidebar-footer">
+      <!-- Footer opcional -->
+    </div>
+  </div>
+</div>
+
+<!-- Modal para confirmações rápidas -->
+<div id="confirm-modal" class="confirm-modal">
+  <div class="confirm-content">
+    <div class="confirm-header">
+      <h4 id="confirm-title">Confirmação</h4>
+      <button class="confirm-close" onclick="closeConfirmModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="confirm-body" id="confirm-body">
+      <!-- Conteúdo da confirmação -->
+    </div>
+    <div class="confirm-footer">
+      <button class="btn btn-outline-secondary" onclick="closeConfirmModal()">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-action">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Modal/Sidebar Styles */
+  .modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: none;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+  
+  .modal-container.show {
+    display: block;
+    opacity: 1;
+  }
+  
+  .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(4px);
+  }
+  
+  /* Sidebar Modal */
+  .sidebar-modal {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 600px;
+    height: 100%;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-xl);
+    transform: translateX(100%);
+    transition: transform var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .modal-container.show .sidebar-modal {
+    transform: translateX(0);
+  }
+  
+  .sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-surface);
+    flex-shrink: 0;
+  }
+  
+  .sidebar-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .sidebar-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+  }
+  
+  .sidebar-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+  
+  .sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+  
+  .sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    flex-shrink: 0;
+  }
+  
+  /* Confirm Modal */
+  .confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+  
+  .confirm-modal.show {
+    display: flex;
+    opacity: 1;
+  }
+  
+  .confirm-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(4px);
+  }
+  
+  .confirm-content {
+    position: relative;
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    width: 90%;
+    max-width: 400px;
+    animation: modalSlideUp var(--transition-base) ease-out;
+  }
+  
+  .confirm-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .confirm-header h4 {
+    margin: 0;
+    color: var(--text-primary);
+  }
+  
+  .confirm-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--border-radius);
+  }
+  
+  .confirm-close:hover {
+    color: var(--text-primary);
+  }
+  
+  .confirm-body {
+    padding: 1.5rem;
+    color: var(--text-primary);
+  }
+  
+  .confirm-footer {
+    padding: 1rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+  
+  /* Animações */
+  @keyframes modalSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .sidebar-modal {
+      max-width: 100%;
+    }
+    
+    .sidebar-header,
+    .sidebar-body,
+    .sidebar-footer {
+      padding: 1rem;
+    }
+  }
+</style>
+
+<script>
+  // Sistema de Modal/Sidebar
+  const ModalManager = {
+    // Abrir sidebar para detalhes/edição
+    openSidebar(title, url) {
+      const container = document.getElementById('modal-container');
+      const sidebar = document.querySelector('.sidebar-modal');
+      
+      // Definir título
+      document.getElementById('sidebar-title').textContent = title;
+      
+      // Carregar conteúdo via HTMX
+      htmx.ajax('GET', url, {
+        target: '#sidebar-body',
+        swap: 'innerHTML',
+        beforeSend: () => {
+          // Mostrar indicador de carregamento
+          document.getElementById('sidebar-body').innerHTML = `
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+              </div>
+              <p class="mt-3 text-muted">Carregando...</p>
+            </div>
+          `;
+        },
+        onSuccess: () => {
+          // Abrir sidebar com animação
+          container.classList.add('show');
+          document.body.style.overflow = 'hidden';
+          
+          // Adicionar classes de animação
+          sidebar.style.animation = 'slideInRight 0.3s ease-out';
+        },
+        onError: () => {
+          document.getElementById('sidebar-body').innerHTML = `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Erro ao carregar conteúdo.
+            </div>
+          `;
+        }
+      });
+    },
+    
+    // Fechar sidebar
+    closeSidebar() {
+      const container = document.getElementById('modal-container');
+      const sidebar = document.querySelector('.sidebar-modal');
+      
+      // Animar fechamento
+      sidebar.style.animation = 'slideInRight 0.3s ease-out reverse';
+      
+      setTimeout(() => {
+        container.classList.remove('show');
+        document.body.style.overflow = '';
+        document.getElementById('sidebar-body').innerHTML = '';
+      }, 250);
+    },
+    
+    // Abrir modal de confirmação
+    openConfirm(title, message, onConfirm) {
+      const modal = document.getElementById('confirm-modal');
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-body').textContent = message;
+      
+      // Configurar ação de confirmação
+      const confirmBtn = document.getElementById('confirm-action');
+      confirmBtn.onclick = () => {
+        onConfirm();
+        this.closeConfirmModal();
+      };
+      
+      // Mostrar modal
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    },
+    
+    // Fechar modal de confirmação
+    closeConfirmModal() {
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    },
+    
+    // Inicializar event listeners
+    init() {
+      // Fechar modal ao clicar no overlay
+      document.getElementById('modal-overlay').addEventListener('click', () => {
+        this.closeSidebar();
+      });
+      
+      // Fechar com ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.closeSidebar();
+          this.closeConfirmModal();
+        }
+      });
+    }
+  };
+  
+  // Inicializar quando o DOM estiver pronto
+  document.addEventListener('DOMContentLoaded', () => {
+    ModalManager.init();
+    
+    // Expor funções globalmente
+    window.openSidebar = (title, url) => ModalManager.openSidebar(title, url);
+    window.closeSidebar = () => ModalManager.closeSidebar();
+    window.openConfirmModal = (title, message, onConfirm) => 
+      ModalManager.openConfirm(title, message, onConfirm);
+    window.closeConfirmModal = () => ModalManager.closeConfirmModal();
+  });
+</script>
 </body>
 </html>

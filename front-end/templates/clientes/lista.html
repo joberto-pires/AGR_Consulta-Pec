@@ -1,71 +1,71 @@
-<div class="container-fluid" hx-ext="cache">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h2 mb-0">Clientes</h1>
-                    <p class="text-muted mb-0">{{.Total}} clientes encontrados</p>
-                </div>
-                <a href="/clientes/novo" 
-                   class="btn btn-primary" 
-                   hx-get="/clientes/novo"
-                   hx-target="#main-content"
-                   hx-push-url="true"
-                   hx-swap="innerHTML swap:0.2s"
-                   preload="hover">
-                    <i class="fas fa-user-plus me-2"></i>Novo Cliente
-                </a>
-            </div>
+{{template "base.html" .}}
+
+{{define "content"}}
+<div class="container-fluid fade-in">
+    <!-- Cabeçalho -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Clientes</h1>
+            <p class="text-muted mb-0">Gerencie seu cadastro de clientes</p>
         </div>
+        <a href="/clientes/novo" 
+           class="btn btn-primary"
+           hx-get="/clientes/novo"
+           hx-target="#main-content"
+           hx-push-url="true">
+            <i class="fas fa-user-plus me-2"></i>Novo Cliente
+        </a>
     </div>
 
-    <!-- Filtros Rápidos -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="agro-card">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="input-group">
-                            <span class="input-group-text bg-transparent border-end-0">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <input type="search" 
-                                   class="form-control border-start-0" 
-                                   placeholder="Buscar por nome, CPF/CNPJ..."
-                                   name="search"
-                                   value="{{.Search}}"
-                                   hx-get="/clientes"
-                                   hx-target="#clientes-container"
-                                   hx-trigger="keyup changed delay:500ms, search"
-                                   hx-swap="innerHTML swap:0.2s"
-                                   hx-indicator="#search-indicator">
-                            <span class="input-group-text bg-transparent">
-                                <div id="search-indicator" class="htmx-indicator">
-                                    <div class="spinner-border spinner-border-sm" role="status">
-                                        <span class="visually-hidden">Buscando...</span>
-                                    </div>
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="search" 
+                               class="form-control" 
+                               placeholder="Buscar por nome, CPF/CNPJ, telefone ou email..."
+                               name="busca"
+                               value="{{.Busca}}"
+                               hx-get="/clientes"
+                               hx-target="#clientes-container"
+                               hx-trigger="keyup changed delay:500ms"
+                               hx-swap="innerHTML"
+                               hx-indicator="#search-indicator">
+                        <button class="btn btn-outline-secondary" type="button"
+                                hx-get="/clientes"
+                                hx-target="#clientes-container">
+                            Limpar
+                        </button>
+                        <span class="input-group-text">
+                            <div id="search-indicator" class="htmx-indicator">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Buscando...</span>
                                 </div>
-                            </span>
-                        </div>
+                            </div>
+                        </span>
                     </div>
-                    <div class="col-md-3">
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
                         <select class="form-select" 
-                                name="status"
                                 hx-get="/clientes"
                                 hx-target="#clientes-container"
                                 hx-trigger="change"
-                                hx-swap="innerHTML swap:0.2s">
-                            <option value="">Todos os status</option>
-                            <option value="ativo" {{if eq .Status "ativo"}}selected{{end}}>Ativos</option>
-                            <option value="inativo" {{if eq .Status "inativo"}}selected{{end}}>Inativos</option>
+                                name="ordenar_por">
+                            <option value="nome" {{if eq .OrdenarPor "nome"}}selected{{end}}>Ordenar por Nome</option>
+                            <option value="data_cadastro" {{if eq .OrdenarPor "data_cadastro"}}selected{{end}}>Ordenar por Data</option>
+                            <option value="id" {{if eq .OrdenarPor "id"}}selected{{end}}>Ordenar por ID</option>
                         </select>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-outline-secondary w-100"
-                                hx-get="/clientes"
+                        <button class="btn btn-outline-secondary"
+                                hx-get="/clientes?ordenar_por={{.OrdenarPor}}&direcao={{if eq .Direcao "ASC"}}DESC{{else}}ASC{{end}}&busca={{.Busca}}"
                                 hx-target="#clientes-container"
-                                hx-swap="innerHTML swap:0.2s">
-                            <i class="fas fa-sync-alt me-2"></i>Atualizar
+                                title="{{if eq .Direcao "ASC"}}Ordenação Ascendente{{else}}Ordenação Descendente{{end}}">
+                            <i class="fas fa-sort-amount-{{if eq .Direcao "ASC"}}up{{else}}down{{end}}"></i>
                         </button>
                     </div>
                 </div>
@@ -73,8 +73,240 @@
         </div>
     </div>
 
-    <!-- Lista de Clientes -->
+    <!-- Container da tabela -->
     <div id="clientes-container">
-        {{template "clientes/lista_partial.html" .}}
+        {{template "clientes/tabela.html" .}}
     </div>
 </div>
+
+<style>
+    /* Estilos específicos para a página de clientes */
+    .card {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        background: var(--bg-card);
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .input-group-text {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+    
+    .form-control, .form-select {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.25);
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+    
+    .btn-outline-secondary {
+        color: var(--text-secondary);
+        border-color: var(--border-color);
+    }
+    
+    .btn-outline-secondary:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+    
+    /* Estilos para a tabela */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg-card);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    thead {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+    
+    th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.05em;
+    }
+    
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    
+    tbody tr:hover {
+        background: var(--bg-tertiary);
+    }
+    
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Botões de ação */
+    .btn-group {
+        display: flex;
+        gap: 0.25rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.375rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+    
+    .btn-outline-info {
+        color: var(--info);
+        border-color: var(--info);
+    }
+    
+    .btn-outline-info:hover {
+        background: var(--info);
+        color: white;
+    }
+    
+    .btn-outline-primary {
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .btn-outline-primary:hover {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .btn-outline-danger {
+        color: var(--danger);
+        border-color: var(--danger);
+    }
+    
+    .btn-outline-danger:hover {
+        background: var(--danger);
+        color: white;
+    }
+    
+    /* Avatar */
+    .avatar-circle-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+    
+    /* Badge */
+    .badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 4px;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+    }
+    
+    /* Paginação */
+    .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        gap: 0.25rem;
+        justify-content: center;
+        margin: 2rem 0 0 0;
+    }
+    
+    .page-item .page-link {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+    
+    .page-item.active .page-link {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+    
+    .page-item .page-link:hover {
+        background: var(--bg-tertiary);
+    }
+    
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    /* Estado vazio */
+    .text-center {
+        text-align: center;
+    }
+    
+    .text-muted {
+        color: var(--text-muted);
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .d-flex {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+        
+        .btn-group {
+            justify-content: center;
+        }
+        
+        table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+{{end}}

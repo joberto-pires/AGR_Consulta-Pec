@@ -258,7 +258,22 @@ func (app *Application) renderTemplate(w http.ResponseWriter, r *http.Request, n
     app.templatesLock.RUnlock()
     
     if tmpl == nil {
+        log.Printf("❌ Templates não inicializados ao tentar renderizar: %s", name)
         http.Error(w, "Templates não inicializados", http.StatusInternalServerError)
+        return
+    }
+    
+    log.Printf("📄 Tentando renderizar template: %s", name)
+    
+    // Verificar se o template existe
+    if tmpl.Lookup(name) == nil {
+        log.Printf("❌ Template não encontrado: %s", name)
+        log.Printf("📋 Templates disponíveis:")
+        tmpls := tmpl.Templates()
+        for _, t := range tmpls {
+            log.Printf("   - %s", t.Name())
+        }
+        http.Error(w, fmt.Sprintf("Template %s não encontrado", name), http.StatusInternalServerError)
         return
     }
     
@@ -278,28 +293,27 @@ func (app *Application) renderTemplate(w http.ResponseWriter, r *http.Request, n
         }
     }
     
-    // IMPORTANTE: Para requisições HTMX, NÃO usar base.html
-    // Verificar se é requisição HTMX
-    if r.Header.Get("HX-Request") == "true" {
-        // Para HTMX, renderizar apenas o template específico sem a base
-        w.Header().Set("Content-Type", "text/html; charset=utf-8")
-        err := tmpl.ExecuteTemplate(w, name, templateData)
-        if err != nil {
-            log.Printf("❌ Erro ao executar template %s (HTMX): %v", name, err)
-            http.Error(w, "Erro ao renderizar template", http.StatusInternalServerError)
-        }
-        return
-    }
+    log.Printf("📊 Dados para template %s: %+v", name, templateData)
     
-    // Para requisições normais, usar a base normalmente
+    // IMPORTANTE: Definir charset UTF-8 explicitamente
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
-    err := tmpl.ExecuteTemplate(w, "base.html", templateData)
+    
+    // Executar template
+    err := tmpl.ExecuteTemplate(w, name, templateData)
     if err != nil {
-        log.Printf("❌ Erro ao executar template base.html: %v", err)
-        http.Error(w, "Erro ao carregar página", http.StatusInternalServerError)
+        log.Printf("❌ Erro ao executar template %s: %v", name, err)
+        
+        // Fallback simples
+        w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+        if app.Env == "development" {
+            w.Write([]byte("Template Error: " + err.Error()))
+        } else {
+            w.Write([]byte("Erro ao carregar página"))
+        }
+    } else {
+        log.Printf("✅ Template %s renderizado com sucesso", name)
     }
 }
-
 func (app *Application) serverError(w http.ResponseWriter, r *http.Request, err error) {
 	log.Printf("❌ Server Error: %s %s - %v", r.Method, r.URL.Path, err)
 	
