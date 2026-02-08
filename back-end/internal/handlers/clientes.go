@@ -145,11 +145,11 @@ func (app *Application) FormCliente(w http.ResponseWriter, r *http.Request) {
     }
 
   log.Printf("🔍 DEBUG: FormCliente chamado, renderizando clientes/formulario.html")
- if r.Header.Get("HX-Request") == "true" {
-        app.renderTemplate(w, r, "clientes/formulario_ajax.html", data)
-    } else {
+// if r.Header.Get("HX-Request") == "true" {
+//        app.renderTemplate(w, r, "clientes/formulario_ajax.html", data)
+//    } else {
         app.renderTemplate(w, r, "clientes/formulario.html", data)
- }
+// }
 }
 
 func (app *Application) SalvarCliente(w http.ResponseWriter, r *http.Request) {
@@ -168,32 +168,75 @@ func (app *Application) SalvarCliente(w http.ResponseWriter, r *http.Request) {
     estado := r.Form.Get("estado")
     observacoes := r.Form.Get("observacoes")
 
+    var result sql.Result
     var err error
-    if id == "" {
+    
+    if (id == "") || (id=="0") {
         // Inserir novo cliente
-        _, err = app.DB.Exec(
-            "INSERT INTO clientes (nome, email, telefone, cpf_cnpj, endereco, cidade, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            nome, email, telefone, cpfCnpj, endereco, cidade, observacoes,
+        result, err = app.DB.Exec(
+            `INSERT INTO clientes 
+            (nome, email, telefone, cpf_cnpj, endereco, cidade, estado, observacoes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            nome, email, telefone, cpfCnpj, endereco, cidade, estado, observacoes,
         )
+        if err != nil {
+            log.Printf("❌ Erro ao inserir cliente: %v", err)
+            app.serverError(w, r, err)
+            return
+        }
+        
+        // Obter o ID gerado
+        rowsAffected, _ := result.RowsAffected()
+        lastID, _ := result.LastInsertId()
+        
+        log.Printf("✅ Cliente inserido - Rows: %d, LastID: %d", rowsAffected, lastID)
+        
+        // Verificar se conseguiu obter o ID
+        if lastID == 0 {
+            // Tentar método alternativo para DuckDB
+            var newID int
+            err = app.DB.QueryRow("SELECT last_insert_id()").Scan(&newID)
+            if err != nil {
+                // Outro método
+                err = app.DB.QueryRow("SELECT currval('clientes_id_seq')").Scan(&newID)
+                if err != nil {
+                    log.Printf("⚠️ Não foi possível obter último ID: %v", err)
+                } else {
+                    log.Printf("✅ ID obtido via currval: %d", newID)
+                }
+            } else {
+                log.Printf("✅ ID obtido via last_insert_id: %d", newID)
+            }
+        }
     } else {
         // Atualizar cliente existente
-        _, err = app.DB.Exec(
-            "UPDATE clientes SET nome=?, email=?, telefone=?, cpf_cnpj=?, endereco=?, cidade=?, estado=?, observacoes=? WHERE id=?",
-            nome, email, telefone, cpfCnpj, endereco, cidade, estado, observacoes, id,
+        idInt, err := strconv.Atoi(id)
+        if err != nil {
+            app.serverError(w, r, err)
+            return
+        }
+        
+        result, err = app.DB.Exec(
+            `UPDATE clientes SET 
+            nome=?, email=?, telefone=?, cpf_cnpj=?, 
+            endereco=?, cidade=?, estado=?, observacoes=? 
+            WHERE id=?`,
+            nome, email, telefone, cpfCnpj, endereco, cidade, estado, observacoes, idInt,
         )
-    }
-
-    if err != nil {
-        app.serverError(w, r, err)
-        return
+        if err != nil {
+            log.Printf("❌ Erro ao atualizar cliente: %v", err)
+            app.serverError(w, r, err)
+            return
+        }
+        
+        rowsAffected, _ := result.RowsAffected()
+        log.Printf("✅ Cliente atualizado - ID: %s, Rows: %d", id, rowsAffected)
     }
 
     // Redirecionar para a lista de clientes
     w.Header().Set("HX-Redirect", "/clientes")
     w.WriteHeader(http.StatusOK)
-}
-
-// DetalhesCliente exibe os detalhes de um cliente
+}// DetalhesCliente exibe os detalhes de um cliente
 func (app *Application) DetalhesCliente(w http.ResponseWriter, r *http.Request) {
     idStr := r.URL.Query().Get("id")
     id, err := strconv.Atoi(idStr)

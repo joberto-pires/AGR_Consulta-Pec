@@ -17,7 +17,7 @@ func main() {
 	if env == "" {
 		env = "development"
 	}
-	
+  os.Setenv("DB_PATH", "AGRConsultaPec.db")	
 	log.Printf("🚀 Iniciando AgroConsultoria v1.0.0")
 	log.Printf("📁 Ambiente: %s", env)
 	

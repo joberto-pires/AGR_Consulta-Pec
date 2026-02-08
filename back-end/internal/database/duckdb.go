@@ -3,6 +3,9 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"strings"
+
 	_ "github.com/marcboeker/go-duckdb"
 )
 
@@ -11,7 +14,7 @@ type Database struct {
 }
 
 func InitDB(dbPath string) (*Database, error) {
-	connStr := fmt.Sprintf("%s?access_mode=READ_WRITE&threads=4", dbPath)
+	connStr := fmt.Sprintf("%s?access_mode=READ_WRITE&threads=6", dbPath)
  db, err := sql.Open("duckdb",connStr)
  if err != nil {
 	 return nil, err
@@ -31,97 +34,77 @@ func InitDB(dbPath string) (*Database, error) {
 
 
 func createTables(db *sql.DB) error {
-	queries := []string{
-// Clientes
-        `CREATE TABLE IF NOT EXISTS clientes (
-            id INTEGER PRIMARY KEY,
-            nome VARCHAR(100) NOT NULL,
-            email VARCHAR(100),
-            telefone VARCHAR(20),
-            cpf_cnpj VARCHAR(20),
-						endereco VARCHAR(80),
-						estado   VARCHAR(03),
-						cidade   VARCHAR(80),
-						observacoes VARCHAR(200),
-            data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`,
-
-        // Propriedades
-        `CREATE TABLE IF NOT EXISTS propriedades (
-            id INTEGER PRIMARY KEY,
-            cliente_id INTEGER,
-            nome VARCHAR(100),
-            hectares DECIMAL(10,2),
-            municipio VARCHAR(100),
-            estado VARCHAR(2),
-            coordenadas VARCHAR(100),
-            tipo_solo VARCHAR(50),
-            FOREIGN KEY (cliente_id) REFERENCES clientes(id)
-        )`,
-
-        // Talhões
-        `CREATE TABLE IF NOT EXISTS talhoes (
-            id INTEGER PRIMARY KEY,
-            propriedade_id INTEGER,
-            numero VARCHAR(10),
-            area_hectares DECIMAL(10,2),
-            cultura_atual VARCHAR(50),
-            data_plantio DATE,
-            produtividade_esperada DECIMAL(10,2),
-            FOREIGN KEY (propriedade_id) REFERENCES propriedades(id)
-        )`,
-
-        // Consultas/Visitas
-        `CREATE TABLE IF NOT EXISTS consultas (
-            id INTEGER PRIMARY KEY,
-            cliente_id INTEGER,
-            propriedade_id INTEGER,
-            data_consulta DATE,
-            tipo_consulta VARCHAR(50),
-            observacoes TEXT,
-            recomendacoes TEXT,
-            proxima_visita DATE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (cliente_id) REFERENCES clientes(id),
-            FOREIGN KEY (propriedade_id) REFERENCES propriedades(id)
-        )`,
-
-        // Análises de Solo
-        `CREATE TABLE IF NOT EXISTS analises_solo (
-            id INTEGER PRIMARY KEY,
-            talhao_id INTEGER,
-            data_analise DATE,
-            ph DECIMAL(3,1),
-            materia_organica DECIMAL(4,2),
-            fosforo_mg_dm3 DECIMAL(6,2),
-            potassio_cmolc_dm3 DECIMAL(6,2),
-            calcio_cmolc_dm3 DECIMAL(6,2),
-            magnesio_cmolc_dm3 DECIMAL(6,2),
-            recomendacao_calcario DECIMAL(8,2),
-            recomendacao_adubacao TEXT,
-            FOREIGN KEY (talhao_id) REFERENCES talhoes(id)
-        )`,
-
-        // Registros de Produção
-        `CREATE TABLE IF NOT EXISTS producoes (
-            id INTEGER PRIMARY KEY,
-            talhao_id INTEGER,
-            safra VARCHAR(10),
-            cultura VARCHAR(50),
-            produtividade_ton_ha DECIMAL(8,2),
-            data_colheita DATE,
-            custo_hectare DECIMAL(10,2),
-            receita_hectare DECIMAL(10,2),
-            lucro_hectare DECIMAL(10,2)
-        )`,		
+	tables := []string{
+		// Tabela clientes com SERIAL para auto-increment
+		`CREATE SEQUENCE IF NOT EXISTS clientes_id_seq START 1`,
+		
+		`CREATE TABLE IF NOT EXISTS clientes (
+			id INTEGER PRIMARY KEY DEFAULT nextval('clientes_id_seq'),
+			nome TEXT NOT NULL,
+			email TEXT,
+			telefone TEXT,
+			cpf_cnpj TEXT UNIQUE,
+			data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			endereco TEXT,
+			cidade TEXT,
+			estado TEXT,
+			observacoes TEXT,
+			ativo BOOLEAN DEFAULT true
+		)`,
+		
+		// Tabela propriedades com SERIAL
+		`CREATE SEQUENCE IF NOT EXISTS propriedades_id_seq START 1`,
+		
+		`CREATE TABLE IF NOT EXISTS propriedades (
+			id INTEGER PRIMARY KEY DEFAULT nextval('propriedades_id_seq'),
+			cliente_id INTEGER NOT NULL,
+			nome TEXT NOT NULL,
+			hectares REAL,
+			municipio TEXT,
+			estado TEXT,
+			coordenadas TEXT,
+			FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+		)`,
+		
+		// Tabela consultas com SERIAL
+		`CREATE SEQUENCE IF NOT EXISTS consultas_id_seq START 1`,
+		
+		`CREATE TABLE IF NOT EXISTS consultas (
+			id INTEGER PRIMARY KEY DEFAULT nextval('consultas_id_seq'),
+			cliente_id INTEGER NOT NULL,
+			propriedade_id INTEGER,
+			data_consulta DATE NOT NULL,
+			tipo_consulta TEXT,
+			observacoes TEXT,
+			resultado TEXT,
+			FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+			FOREIGN KEY (propriedade_id) REFERENCES propriedades(id)
+		)`,
+		
+		// Tabela analises com SERIAL
+		`CREATE SEQUENCE IF NOT EXISTS analises_id_seq START 1`,
+		
+		`CREATE TABLE IF NOT EXISTS analises (
+			id INTEGER PRIMARY KEY DEFAULT nextval('analises_id_seq'),
+			propriedade_id INTEGER NOT NULL,
+			tipo_analise TEXT,
+			data_amostra DATE,
+			resultado TEXT,
+			recomendacoes TEXT,
+			FOREIGN KEY (propriedade_id) REFERENCES propriedades(id)
+		)`,
 	}
-	for _, query := range queries {
-		_, err := db.Exec(query)
+	
+	for i, tableSQL := range tables {
+		log.Printf("📝 Criando: %s", strings.Split(tableSQL, " ")[1])
+		_, err := db.Exec(tableSQL)
 		if err != nil {
-			return fmt.Errorf("Erro ao criar Tabela: %v", err)
+			return fmt.Errorf("erro ao executar SQL %d: %v\nSQL: %s", i+1, err, tableSQL)
 		}
 	}
-   return nil
+	
+	log.Println("✅ Tabelas criadas com sucesso")
+	return nil
 }
 
 func (db *Database) Close() error {
