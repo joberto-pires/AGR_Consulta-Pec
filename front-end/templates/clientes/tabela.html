@@ -7,12 +7,12 @@
                     <a href="#" 
                        hx-get="/clientes?ordenar_por=id&direcao={{if eq .OrdenarPor "id"}}{{if eq .Direcao "ASC"}}DESC{{else}}ASC{{end}}{{else}}DESC{{end}}&busca={{.Busca}}"
                        hx-target="#clientes-container"
-                       class="text-decoration-none d-flex align-items-center gap-1">
+                       class="d-flex align-items-center gap-1 text-decoration-none">
                         ID
                         {{if eq .OrdenarPor "id"}}
                             <i class="fas fa-sort-{{if eq .Direcao "ASC"}}up{{else}}down{{end}} small"></i>
                         {{else}}
-                            <i class="fas fa-sort small text-muted"></i>
+                            <i class="fas fa-sort small"></i>
                         {{end}}
                     </a>
                 </th>
@@ -60,8 +60,8 @@
                         <strong>{{.Nome}}</strong>
                     </div>
                 </td>
-                <td>{{.CpfCnpj | formatCPFCNPJ}}</td>
-                <td>{{.Telefone | formatPhone}}</td>
+                <td>{{.CpfCnpj}}</td>
+                <td>{{.Telefone}}</td>
                 <td>{{.Email}}</td>
                 <td>{{formatDate "02/01/2006" .DataCadastro}}</td>
                 <td class="text-end">
