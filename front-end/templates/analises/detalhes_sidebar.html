@@ -1,0 +1,117 @@
+{{define "analises/detalhes_sidebar.html"}}
+<link rel="stylesheet" href="/static/css/pages.css">
+ 
+<div class="detail-section">
+    <div class="detail-section-title">Identificação</div>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-label">Propriedade</span>
+            <span class="detail-value">{{.Analise.PropriedadeNome}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Cliente</span>
+            <span class="detail-value">{{.Analise.ClienteNome}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Talhão</span>
+            <span class="detail-value">{{if .Analise.Talhao}}{{.Analise.Talhao}}{{else}}—{{end}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Data da Amostra</span>
+            <span class="detail-value">{{.Analise.DataAmostra}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Status</span>
+            <span class="detail-value">
+                {{if eq .Analise.Status "pendente"}}<span class="badge-status badge-warning">Pendente</span>
+                {{else if eq .Analise.Status "em_analise"}}<span class="badge-status badge-info">Em Análise</span>
+                {{else if eq .Analise.Status "concluida"}}<span class="badge-status badge-success">Concluída</span>
+                {{else}}<span class="badge-status badge-secondary">{{.Analise.Status}}</span>{{end}}
+            </span>
+        </div>
+    </div>
+</div>
+ 
+<div class="detail-section">
+    <div class="detail-section-title">Parâmetros</div>
+    <div style="display:flex;flex-direction:column;gap:0.75rem">
+        <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+                <span style="font-size:0.8rem;font-weight:600;color:var(--text-secondary)">pH</span>
+                <span style="font-size:0.8rem;font-weight:700;color:{{if lt .Analise.PH 6.0}}var(--danger){{else if gt .Analise.PH 7.0}}var(--warning){{else}}var(--success){{end}}">{{printf "%.1f" .Analise.PH}}</span>
+            </div>
+            <div class="param-bar-bg"><div class="param-bar-fill" style="width:{{printf "%.0f" (mul .Analise.PH 7.14)}}%;background:{{if lt .Analise.PH 6.0}}var(--danger){{else if gt .Analise.PH 7.0}}var(--warning){{else}}var(--success){{end}}"></div></div>
+        </div>
+        <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+                <span style="font-size:0.8rem;font-weight:600;color:var(--text-secondary)">Matéria Orgânica</span>
+                <span style="font-size:0.8rem;font-weight:700">{{printf "%.2f" .Analise.MateriaOrganica}}%</span>
+            </div>
+            <div class="param-bar-bg"><div class="param-bar-fill" style="width:{{printf "%.0f" (mul .Analise.MateriaOrganica 20.0)}}%"></div></div>
+        </div>
+        <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+                <span style="font-size:0.8rem;font-weight:600;color:var(--text-secondary)">Saturação de Bases</span>
+                <span style="font-size:0.8rem;font-weight:700">{{printf "%.1f" .Analise.SaturacaoBases}}%</span>
+            </div>
+            <div class="param-bar-bg"><div class="param-bar-fill" style="width:{{printf "%.0f" .Analise.SaturacaoBases}}%"></div></div>
+        </div>
+    </div>
+    <div class="detail-grid" style="margin-top:1rem">
+        <div class="detail-item">
+            <span class="detail-label">Nitrogênio</span>
+            <span class="detail-value">{{printf "%.2f" .Analise.Nitrogenio}} mg/dm³</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Fósforo</span>
+            <span class="detail-value">{{printf "%.2f" .Analise.Fosforo}} mg/dm³</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Potássio</span>
+            <span class="detail-value">{{printf "%.2f" .Analise.Potassio}} mg/dm³</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">CTC</span>
+            <span class="detail-value">{{printf "%.2f" .Analise.CTC}} cmolc/dm³</span>
+        </div>
+    </div>
+</div>
+ 
+{{if .Analise.RecCalcario}}
+<div class="detail-section">
+    <div class="detail-section-title">Recomendação de Calcário</div>
+    <p style="font-size:0.875rem;line-height:1.6;color:var(--text-primary)">{{.Analise.RecCalcario}}</p>
+</div>
+{{end}}
+ 
+{{if .Analise.RecAdubacao}}
+<div class="detail-section">
+    <div class="detail-section-title">Recomendação de Adubação</div>
+    <p style="font-size:0.875rem;line-height:1.6;color:var(--text-primary)">{{.Analise.RecAdubacao}}</p>
+</div>
+{{end}}
+ 
+{{if .Analise.PlanoCorrecao}}
+<div class="detail-section">
+    <div class="detail-section-title">Plano de Correção</div>
+    <p style="font-size:0.875rem;line-height:1.6;color:var(--text-primary)">{{.Analise.PlanoCorrecao}}</p>
+</div>
+{{end}}
+ 
+<div class="detail-actions">
+    <button class="btn-ghost"
+        hx-get="/analises/editar?id={{.Analise.ID}}" hx-target="#sidebar-body" hx-swap="innerHTML"
+        onclick="document.getElementById('sidebar-title').textContent='Editar Análise'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Editar
+    </button>
+    <button class="btn-danger-ghost" style="margin-left:auto"
+        hx-delete="/analises/excluir?id={{.Analise.ID}}"
+        hx-confirm="Excluir esta análise?"
+        hx-on::after-request="closeSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+        Excluir
+    </button>
+</div>
+{{end}}
+

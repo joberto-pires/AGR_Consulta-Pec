@@ -1,242 +1,142 @@
-<aside class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo d-flex align-items-center gap-3">
-                <i class="fas fa-leaf"></i>
-            <div>
-                <h3 class="mb-0">AgroConsultoria</h3>
-                <small class="text-muted">Gestão Agropecuária</small>
-            </div>
+{{define "components/sidebar.html"}}
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+            </svg>
         </div>
+        <span class="brand-name">AgroConsultoria</span>
     </div>
-    
-    <div class="sidebar-divider"></div>
-    
+
     <nav class="sidebar-nav">
         <div class="nav-section">
-            <div class="nav-section-header">
-                <i class="fas fa-home nav-section-icon"></i>
-                <span>Principal</span>
-            </div>
-            <a href="/" class="nav-link {{if eq .CurrentURL "/"}}active{{end}}">
-                <i class="fas fa-chart-line nav-link-icon"></i>
+            <span class="nav-section-label">Principal</span>
+            <a class="nav-item {{if eq .CurrentURL "/"}}active{{end}}"
+               href="/" onclick="navTo(event, '/')">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
                 <span>Dashboard</span>
             </a>
         </div>
-        
+
         <div class="nav-section">
-            <div class="nav-section-header">
-                <i class="fas fa-cogs nav-section-icon"></i>
-                <span>Gestão</span>
-            </div>
-            <a href="/clientes" hx-get="/clientes" hx-target="#main-content" hx-push-url="true" class="nav-link {{if eq .CurrentURL "/clientes"}}active{{end}}">
-                <i class="fas fa-users nav-link-icon"></i>
+            <span class="nav-section-label">Cadastros</span>
+            <a class="nav-item {{if eq .CurrentURL "/clientes"}}active{{end}}"
+               href="/clientes" onclick="navTo(event, '/clientes')">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
                 <span>Clientes</span>
-                <span class="nav-badge">{{if .ClientCount}}{{.ClientCount}}{{else}}24{{end}}</span>
             </a>
-            <a href="/propriedades" class="nav-link {{if eq .CurrentURL "/propriedades"}}active{{end}}">
-                <i class="fas fa-tractor nav-link-icon"></i>
+            <a class="nav-item {{if eq .CurrentURL "/propriedades"}}active{{end}}"
+               href="/propriedades" onclick="navTo(event, '/propriedades')">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polygon points="3 11 12 2 21 11 21 22 3 22"/><path d="M9 22V12h6v10"/></svg></span>
                 <span>Propriedades</span>
-                <span class="nav-badge">18</span>
             </a>
         </div>
-        
+
         <div class="nav-section">
-            <div class="nav-section-header">
-                <i class="fas fa-clipboard-check nav-section-icon"></i>
-                <span>Consultoria</span>
-            </div>
-            <a href="/consultas" class="nav-link {{if eq .CurrentURL "/consultas"}}active{{end}}">
-                <i class="fas fa-calendar-check nav-link-icon"></i>
+            <span class="nav-section-label">Operações</span>
+            <a class="nav-item {{if eq .CurrentURL "/analises"}}active{{end}}"
+               href="/analises" onclick="navTo(event, '/analises')">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg></span>
+                <span>Análise de Solo</span>
+            </a>
+            <a class="nav-item {{if eq .CurrentURL "/consultas"}}active{{end}}"
+               href="/consultas" onclick="navTo(event, '/consultas')">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
                 <span>Consultas</span>
-                <span class="nav-badge badge-warning">5</span>
             </a>
-            <a href="/analises" class="nav-link {{if eq .CurrentURL "/analises"}}active{{end}}">
-                <i class="fas fa-flask nav-link-icon"></i>
-                <span>Análises</span>
-                <span class="nav-badge">12</span>
-            </a>
-        </div>
-        
-        <div class="nav-section">
-            <div class="nav-section-header">
-                <i class="fas fa-chart-bar nav-section-icon"></i>
-                <span>Relatórios</span>
-            </div>
-            <a href="/relatorios" class="nav-link {{if eq .CurrentURL "/relatorios"}}active{{end}}">
-                <i class="fas fa-file-chart-line nav-link-icon"></i>
-                <span>Relatórios</span>
-            </a>
-            <a href="/calendario" class="nav-link {{if eq .CurrentURL "/calendario"}}active{{end}}">
-                <i class="fas fa-calendar-alt nav-link-icon"></i>
-                <span>Calendário</span>
+            <a class="nav-item {{if eq .CurrentURL "/monitoramento"}}active{{end}}"
+               href="/monitoramento" onclick="navTo(event, '/monitoramento')">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+                <span>Monitoramento</span>
             </a>
         </div>
     </nav>
-    
+
     <div class="sidebar-footer">
-        <div class="sidebar-footer-section">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="text-muted small">Sistema</span>
-                <span class="badge bg-success small">Online</span>
-            </div>
-            <div class="text-muted small mb-1">
-                <i class="fas fa-code-branch me-1"></i> Versão: {{.Version}}
-            </div>
-            <div class="text-muted small">
-                <i class="fas fa-server me-1"></i> Ambiente: {{.Env}}
-            </div>
-        </div>
-        
-        <div class="sidebar-footer-actions">
-      <button class="btn" onclick="window.toggleTheme()">
-                <i class="fas fa-moon me-2"></i>
-            </button>
-            <div class="text-center small text-muted">
-                &copy; {{.Year}} AgroConsultoria
-            </div>
-        </div>
+        <button class="btn-icon theme-toggle" title="Alternar tema" onclick="window.toggleTheme()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <span class="sidebar-version">v1.0.0</span>
     </div>
 </aside>
 
+<script>
+function navTo(e, url) {
+    e.preventDefault();
+    // Close any open modal/sidebar
+    var modal = document.getElementById('modal-container');
+    if (modal) modal.classList.remove('show');
+    document.body.style.overflow = '';
+
+    // Load page via HTMX
+    htmx.ajax('GET', url, {
+        target: '#main-content',
+        swap: 'innerHTML',
+        pushUrl: url
+    });
+
+    // Update active nav highlight immediately
+    document.querySelectorAll('.nav-item').forEach(function(el) {
+        el.classList.remove('active');
+    });
+    e.currentTarget.classList.add('active');
+}
+</script>
+
 <style>
-    .sidebar {
-        display: flex;
-        flex-direction: column;
-        background: var(--bg-card);
-        border-right: 1px solid var(--border-color);
-    }
-    
-    .sidebar-header {
-        padding: 1.5rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .logo-icon {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.2rem;
-    }
-    
-    .sidebar-divider {
-        height: 1px;
-        background: var(--border-color);
-        margin: 0 1rem;
-    }
-    
-    .sidebar-nav {
-        flex: 1;
-        padding: 1rem 0;
-        overflow-y: auto;
-    }
-    
-    .nav-section {
-        margin-bottom: 1.5rem;
-    }
-    
-    .nav-section-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.5rem 1rem;
-        color: var(--text-secondary);
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 600;
-    }
-    
-    .nav-section-icon {
-        font-size: 0.9rem;
-        opacity: 0.7;
-    }
-    
-    .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 1rem;
-        color: var(--text-primary);
-        text-decoration: none;
-        border-left: 3px solid transparent;
-        transition: all 0.2s ease;
-        position: relative;
-    }
-    
-    .nav-link:hover {
-        background: var(--bg-tertiary);
-        color: var(--primary);
-        border-left-color: var(--primary-light);
-    }
-    
-    .nav-link.active {
-        background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.1) 0%, transparent 100%);
-        color: var(--primary);
-        border-left-color: var(--primary);
-        font-weight: 500;
-    }
-    
-    .nav-link-icon {
-        width: 20px;
-        text-align: center;
-        font-size: 1.1rem;
-        opacity: 0.8;
-    }
-    
-    .nav-badge {
-        margin-left: auto;
-        background: var(--primary-light);
-        color: var(--primary-dark);
-        font-size: 0.7rem;
-        padding: 0.2rem 0.5rem;
-        border-radius: 10px;
-        font-weight: 600;
-        min-width: 24px;
-        text-align: center;
-    }
-    
-    .badge-warning {
-        background: var(--warning) !important;
-        color: #000 !important;
-    }
-    
-    .sidebar-footer {
-        padding: 1rem;
-        border-top: 1px solid var(--border-color);
-        background: var(--bg-secondary);
-    }
-    
-    .sidebar-footer-section {
-        margin-bottom: 1rem;
-    }
-    
-    .sidebar-footer-actions {
-        margin-top: 1rem;
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-        .sidebar {
-            width: 280px;
-        }
-        
-        .mobile-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .mobile-title {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-    }
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-color);
+}
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.brand-icon {
+    width: 40px; height: 40px;
+    background: var(--primary);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; flex-shrink: 0;
+}
+.brand-name { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+.sidebar-nav {
+    flex: 1; padding: 1rem 0.75rem;
+    overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem;
+}
+.nav-section { display: flex; flex-direction: column; gap: 0.25rem; }
+.nav-section-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-muted); padding: 0 0.5rem 0.5rem;
+}
+.nav-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.625rem 0.75rem; border-radius: 8px;
+    text-decoration: none; color: var(--text-secondary);
+    font-size: 0.875rem; font-weight: 500; transition: all 0.15s ease; cursor: pointer;
+}
+.nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); text-decoration: none; }
+.nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+[data-theme="dark"] .nav-item.active { background: rgba(76,175,80,0.15); }
+.nav-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: inherit; }
+.sidebar-footer {
+    padding: 1rem; border-top: 1px solid var(--border-color);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.btn-icon {
+    background: none; border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 0.4rem; cursor: pointer; color: var(--text-secondary);
+    display: flex; align-items: center; transition: all 0.15s ease;
+}
+.btn-icon:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.sidebar-version { font-size: 0.75rem; color: var(--text-muted); }
 </style>
+{{end}}

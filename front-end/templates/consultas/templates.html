@@ -1,0 +1,277 @@
+{{define "consultas/tabela.html"}}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Propriedade</th>
+            <th>Data</th>
+            <th>Tipo</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    {{if .Consultas}}
+        {{range .Consultas}}
+        <tr>
+            <td>
+                <div class="cell-with-avatar">
+                    <div class="avatar">{{firstLetter .ClienteNome}}</div>
+                    <span class="cell-primary">{{.ClienteNome}}</span>
+                </div>
+            </td>
+            <td class="cell-muted">{{if .PropriedadeNome}}{{.PropriedadeNome}}{{else}}—{{end}}</td>
+            <td class="cell-muted">{{.DataConsulta}}</td>
+            <td class="cell-muted">{{.Tipo}}</td>
+            <td>
+                {{if eq .Status "agendada"}}<span class="badge-status badge-info">Agendada</span>
+                {{else if eq .Status "em_andamento"}}<span class="badge-status badge-warning">Em Andamento</span>
+                {{else if eq .Status "concluida"}}<span class="badge-status badge-success">Concluída</span>
+                {{else if eq .Status "cancelada"}}<span class="badge-status badge-danger">Cancelada</span>
+                {{else}}<span class="badge-status badge-secondary">{{.Status}}</span>{{end}}
+            </td>
+            <td>
+                <div style="display:flex;gap:0.4rem;justify-content:flex-end">
+                    <button class="btn-ghost"
+                        hx-get="/consultas/detalhes?id={{.ID}}" hx-target="#sidebar-body" hx-swap="innerHTML"
+                        onclick="document.getElementById('sidebar-title').textContent='Detalhes da Consulta'; document.getElementById('modal-container').classList.add('show'); document.body.style.overflow='hidden'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Ver
+                    </button>
+                    <button class="btn-ghost"
+                        hx-get="/consultas/editar?id={{.ID}}" hx-target="#sidebar-body" hx-swap="innerHTML"
+                        onclick="document.getElementById('sidebar-title').textContent='Editar Consulta'; document.getElementById('modal-container').classList.add('show'); document.body.style.overflow='hidden'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Editar
+                    </button>
+                    <button class="btn-danger-ghost"
+                        hx-delete="/consultas/excluir?id={{.ID}}"
+                        hx-confirm="Excluir esta consulta?"
+                        hx-target="#tabela-consultas"
+                        hx-get="/consultas?partial=1">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        {{end}}
+    {{else}}
+        <tr><td colspan="6">
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <h4>Nenhuma consulta encontrada</h4>
+                <p>Agende a primeira consulta técnica usando o botão acima.</p>
+            </div>
+        </td></tr>
+    {{end}}
+    </tbody>
+</table>
+
+{{if gtInt .TotalPaginas 1}}
+<div class="pagination-bar">
+    <span class="pagination-info">{{.TotalRegistros}} registros · Página {{.PaginaAtual}} de {{.TotalPaginas}}</span>
+    <div class="pagination-controls">
+        <a class="page-btn {{if leInt .PaginaAtual 1}}disabled{{end}}"
+           hx-get="/consultas?partial=1&pagina={{sub .PaginaAtual 1}}" hx-target="#tabela-consultas">‹</a>
+        {{range .Paginas}}
+        <a class="page-btn {{if eqInt . $.PaginaAtual}}active{{end}}"
+           hx-get="/consultas?partial=1&pagina={{.}}" hx-target="#tabela-consultas">{{.}}</a>
+        {{end}}
+        <a class="page-btn {{if geInt .PaginaAtual .TotalPaginas}}disabled{{end}}"
+           hx-get="/consultas?partial=1&pagina={{add .PaginaAtual 1}}" hx-target="#tabela-consultas">›</a>
+    </div>
+</div>
+{{end}}
+{{end}}
+
+
+{{define "consultas/editar_sidebar.html"}}
+<link rel="stylesheet" href="/static/css/pages.css">
+<form hx-post="/consultas/salvar" hx-target="body">
+    <input type="hidden" name="id" value="{{.Consulta.ID}}">
+
+    <div class="form-grid">
+        <div class="form-group full">
+            <label class="form-label">Cliente *</label>
+            <select name="cliente_id" class="form-select" required>
+                <option value="">Selecione...</option>
+                {{range .Clientes}}
+                <option value="{{.ID}}" {{if eq .ID $.Consulta.ClienteID}}selected{{end}}>{{.Nome}}</option>
+                {{end}}
+            </select>
+        </div>
+
+        <div class="form-group full">
+            <label class="form-label">Propriedade</label>
+            <select name="propriedade_id" class="form-select">
+                <option value="">Nenhuma (consulta remota)</option>
+                {{range .Propriedades}}
+                <option value="{{.ID}}" {{if eq .ID $.Consulta.PropriedadeID}}selected{{end}}>{{.Nome}} — {{.ClienteNome}}</option>
+                {{end}}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Data da Consulta *</label>
+            <input type="date" name="data_consulta" class="form-input" value="{{.Consulta.DataConsulta}}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select name="tipo" class="form-select">
+                {{range .Tipos}}
+                <option value="{{.}}" {{if eq . $.Consulta.Tipo}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                {{range .StatusOpts}}
+                <option value="{{.}}" {{if eq . $.Consulta.Status}}selected{{end}}>
+                    {{if eq . "agendada"}}Agendada
+                    {{else if eq . "em_andamento"}}Em Andamento
+                    {{else if eq . "concluida"}}Concluída
+                    {{else if eq . "cancelada"}}Cancelada
+                    {{else}}{{.}}{{end}}
+                </option>
+                {{end}}
+            </select>
+        </div>
+
+        <div class="form-group full">
+            <label class="form-label">Diagnóstico</label>
+            <textarea name="diagnostico" class="form-textarea" placeholder="Descrição do diagnóstico da propriedade...">{{.Consulta.Diagnostico}}</textarea>
+        </div>
+
+        <div class="form-group full">
+            <label class="form-label">Recomendações</label>
+            <textarea name="recomendacoes" class="form-textarea" placeholder="Recomendações técnicas de manejo...">{{.Consulta.Recomendacoes}}</textarea>
+        </div>
+
+        <div class="form-group full">
+            <label class="form-label">Planejamento de Safra</label>
+            <textarea name="planejamento_safra" class="form-textarea" placeholder="Cultura, variedades, épocas de plantio...">{{.Consulta.PlanejamentoSafra}}</textarea>
+        </div>
+
+        <div class="form-group full">
+            <label class="form-label">Controle de Pragas/Doenças</label>
+            <textarea name="controle_pragas" class="form-textarea" placeholder="Produtos, doses, frequência de aplicação...">{{.Consulta.ControlePragas}}</textarea>
+        </div>
+
+        <div class="form-group full">
+            <label class="form-label">Gestão de Irrigação</label>
+            <textarea name="gestao_irrigacao" class="form-textarea" placeholder="Lâmina, frequência, sistema utilizado...">{{.Consulta.GestaoIrrigacao}}</textarea>
+        </div>
+
+        <div class="form-group full">
+            <label class="form-label">Análise de Custos</label>
+            <textarea name="analise_custos" class="form-textarea" placeholder="Custo por hectare, projeção de retorno...">{{.Consulta.AnaliseCustos}}</textarea>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" class="btn-ghost" onclick="closeSidebar()">Cancelar</button>
+        <button type="submit" class="btn-primary-agro">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Salvar
+        </button>
+    </div>
+</form>
+{{end}}
+
+
+{{define "consultas/detalhes_sidebar.html"}}
+<link rel="stylesheet" href="/static/css/pages.css">
+
+<div class="detail-section">
+    <div class="detail-section-title">Informações</div>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-label">Cliente</span>
+            <span class="detail-value">{{.Consulta.ClienteNome}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Propriedade</span>
+            <span class="detail-value">{{if .Consulta.PropriedadeNome}}{{.Consulta.PropriedadeNome}}{{else}}Remota{{end}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Data</span>
+            <span class="detail-value">{{.Consulta.DataConsulta}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Tipo</span>
+            <span class="detail-value">{{.Consulta.Tipo}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Status</span>
+            <span class="detail-value">
+                {{if eq .Consulta.Status "agendada"}}<span class="badge-status badge-info">Agendada</span>
+                {{else if eq .Consulta.Status "em_andamento"}}<span class="badge-status badge-warning">Em Andamento</span>
+                {{else if eq .Consulta.Status "concluida"}}<span class="badge-status badge-success">Concluída</span>
+                {{else if eq .Consulta.Status "cancelada"}}<span class="badge-status badge-danger">Cancelada</span>
+                {{end}}
+            </span>
+        </div>
+    </div>
+</div>
+
+{{if .Consulta.Diagnostico}}
+<div class="detail-section">
+    <div class="detail-section-title">Diagnóstico</div>
+    <p style="font-size:0.875rem;line-height:1.6;color:var(--text-primary)">{{.Consulta.Diagnostico}}</p>
+</div>
+{{end}}
+
+{{if .Consulta.Recomendacoes}}
+<div class="detail-section">
+    <div class="detail-section-title">Recomendações</div>
+    <p style="font-size:0.875rem;line-height:1.6;color:var(--text-primary)">{{.Consulta.Recomendacoes}}</p>
+</div>
+{{end}}
+
+{{if .Consulta.PlanejamentoSafra}}
+<div class="detail-section">
+    <div class="detail-section-title">Planejamento de Safra</div>
+    <p style="font-size:0.875rem;line-height:1.6;color:var(--text-primary)">{{.Consulta.PlanejamentoSafra}}</p>
+</div>
+{{end}}
+
+{{if .Consulta.ControlePragas}}
+<div class="detail-section">
+    <div class="detail-section-title">Controle de Pragas/Doenças</div>
+    <p style="font-size:0.875rem;line-height:1.6;color:var(--text-primary)">{{.Consulta.ControlePragas}}</p>
+</div>
+{{end}}
+
+{{if .Consulta.GestaoIrrigacao}}
+<div class="detail-section">
+    <div class="detail-section-title">Gestão de Irrigação</div>
+    <p style="font-size:0.875rem;line-height:1.6;color:var(--text-primary)">{{.Consulta.GestaoIrrigacao}}</p>
+</div>
+{{end}}
+
+{{if .Consulta.AnaliseCustos}}
+<div class="detail-section">
+    <div class="detail-section-title">Análise de Custos</div>
+    <p style="font-size:0.875rem;line-height:1.6;color:var(--text-primary)">{{.Consulta.AnaliseCustos}}</p>
+</div>
+{{end}}
+
+<div class="detail-actions">
+    <button class="btn-ghost"
+        hx-get="/consultas/editar?id={{.Consulta.ID}}" hx-target="#sidebar-body" hx-swap="innerHTML"
+        onclick="document.getElementById('sidebar-title').textContent='Editar Consulta'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Editar
+    </button>
+    <button class="btn-danger-ghost" style="margin-left:auto"
+        hx-delete="/consultas/excluir?id={{.Consulta.ID}}"
+        hx-confirm="Excluir esta consulta?"
+        hx-on::after-request="closeSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+        Excluir
+    </button>
+</div>
+{{end}}

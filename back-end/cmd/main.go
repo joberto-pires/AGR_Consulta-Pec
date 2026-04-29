@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-// Configuração do ambiente
 	env := os.Getenv("GO_ENV")
 	if env == "" {
 		env = "development"
@@ -21,7 +20,6 @@ func main() {
 	log.Printf("🚀 Iniciando AgroConsultoria v1.0.0")
 	log.Printf("📁 Ambiente: %s", env)
 	
-	// Inicializar banco de dados
 	dbPath := "AGRConsultaPec.db"
 	if customPath := os.Getenv("DB_PATH"); customPath != "" {
 		dbPath = customPath
@@ -57,15 +55,12 @@ func main() {
 		}
 	}
 	
-	// Log dos caminhos encontrados
 	log.Printf("🔍 Procurando templates em: %s", templatesPath)
 	
-	// Verificar se o diretório existe
 	if _, err := os.Stat(templatesPath); os.IsNotExist(err) {
 		log.Printf("⚠️  Diretório de templates não encontrado: %s", templatesPath)
 	}
 
-	// Configurar handlers
 	app := &handlers.Application{
 		DB:            db.DB,
 		TemplatesFS:   templatesPath,
@@ -79,13 +74,11 @@ func main() {
 			log.Fatalf("❌ Erro ao inicializar templates: %v", err)
 		}
 		
-	// Configurar servidor HTTP
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-// Criar handler com middlewares
 handler := app.Routes()
 handler = middleware.CacheMiddleware(handler)
 handler = middleware.NoCompressionMiddleware(handler) // Use este em vez de GzipMiddleware

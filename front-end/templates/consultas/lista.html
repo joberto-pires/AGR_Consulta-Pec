@@ -1,0 +1,49 @@
+{{template "base.html" .}}
+{{define "content"}}
+<link rel="stylesheet" href="/static/css/pages.css">
+<div class="container-fluid fade-in">
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Consultas Técnicas
+            </h1>
+            <p class="page-subtitle">{{.TotalRegistros}} consultas registradas</p>
+        </div>
+        <button class="btn-primary-agro"
+            hx-get="/consultas/novo" hx-target="#sidebar-body" hx-swap="innerHTML"
+            onclick="document.getElementById('sidebar-title').textContent='Nova Consulta'; document.getElementById('modal-container').classList.add('show'); document.body.style.overflow='hidden'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nova Consulta
+        </button>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="search-input" placeholder="Buscar por cliente, tipo..."
+                name="busca" value="{{.Busca}}"
+                hx-get="/consultas?partial=1"
+                hx-target="#tabela-consultas"
+                hx-trigger="keyup changed delay:400ms"
+                hx-include="[name='busca'],[name='status']">
+        </div>
+        <select name="status" class="filter-select"
+            hx-get="/consultas?partial=1"
+            hx-target="#tabela-consultas"
+            hx-trigger="change"
+            hx-include="[name='busca'],[name='status']">
+            <option value="">Todos os status</option>
+            <option value="agendada"     {{if eq .StatusFiltro "agendada"}}selected{{end}}>Agendada</option>
+            <option value="em_andamento" {{if eq .StatusFiltro "em_andamento"}}selected{{end}}>Em Andamento</option>
+            <option value="concluida"    {{if eq .StatusFiltro "concluida"}}selected{{end}}>Concluída</option>
+            <option value="cancelada"    {{if eq .StatusFiltro "cancelada"}}selected{{end}}>Cancelada</option>
+        </select>
+    </div>
+
+    <div class="data-card" id="tabela-consultas">
+        {{template "consultas/tabela.html" .}}
+    </div>
+</div>
+{{end}}

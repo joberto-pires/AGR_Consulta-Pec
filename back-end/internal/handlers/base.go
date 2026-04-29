@@ -48,6 +48,11 @@ func (app *Application) ReloadTemplates() error {
 	"sub": func(a,b int) int { return a - b},
 	"mul": func(a,b int) int { return a * b},
 	"div": func(a,b int) int { return a / b},
+	"gtInt": func(a,b int) bool { return a > b },
+	"geInt": func(a,b int) bool { return a >= b },
+	"leInt": func(a,b int) bool { return a <= b },
+	"ltInt": func(a,b int) bool { return a < b },
+	"eqInt": func(a,b int) bool { return a == b },
 	"split": strings.Split,
 	"iterate": func(start, end int) []int {
 		var list []int
@@ -205,16 +210,50 @@ func (app *Application) Routes() http.Handler {
         fs.ServeHTTP(w, r)
     })))
     
-    // Resto das rotas...
+    // Dashboard
     mux.HandleFunc("/", app.Homepage)
+
+    // Clientes
     mux.HandleFunc("/clientes", app.ListaClientes)
     mux.HandleFunc("/clientes/novo", app.FormCliente)
     mux.HandleFunc("/clientes/editar", app.FormCliente)
     mux.HandleFunc("/clientes/salvar", app.SalvarCliente)
     mux.HandleFunc("/clientes/detalhes", app.DetalhesCliente)
     mux.HandleFunc("/clientes/excluir", app.ExcluirCliente)
-    
-    // Rota para recarregar templates em desenvolvimento
+
+    // Propriedades
+    mux.HandleFunc("/propriedades", app.ListaPropriedades)
+    mux.HandleFunc("/propriedades/novo", app.FormPropriedade)
+    mux.HandleFunc("/propriedades/editar", app.FormPropriedade)
+    mux.HandleFunc("/propriedades/salvar", app.SalvarPropriedade)
+    mux.HandleFunc("/propriedades/detalhes", app.DetalhesPropriedade)
+    mux.HandleFunc("/propriedades/excluir", app.ExcluirPropriedade)
+
+    // Análises de Solo
+    mux.HandleFunc("/analises", app.ListaAnalises)
+    mux.HandleFunc("/analises/novo", app.FormAnalise)
+    mux.HandleFunc("/analises/editar", app.FormAnalise)
+    mux.HandleFunc("/analises/salvar", app.SalvarAnalise)
+    mux.HandleFunc("/analises/detalhes", app.DetalhesAnalise)
+    mux.HandleFunc("/analises/excluir", app.ExcluirAnalise)
+
+    // Consultas Técnicas
+    mux.HandleFunc("/consultas", app.ListaConsultas)
+    mux.HandleFunc("/consultas/novo", app.FormConsulta)
+    mux.HandleFunc("/consultas/editar", app.FormConsulta)
+    mux.HandleFunc("/consultas/salvar", app.SalvarConsulta)
+    mux.HandleFunc("/consultas/detalhes", app.DetalhesConsulta)
+    mux.HandleFunc("/consultas/excluir", app.ExcluirConsulta)
+
+    // Monitoramento
+    mux.HandleFunc("/monitoramento", app.ListaMonitoramento)
+    mux.HandleFunc("/monitoramento/novo", app.FormMonitoramento)
+    mux.HandleFunc("/monitoramento/editar", app.FormMonitoramento)
+    mux.HandleFunc("/monitoramento/salvar", app.SalvarMonitoramento)
+    mux.HandleFunc("/monitoramento/detalhes", app.DetalhesMonitoramento)
+    mux.HandleFunc("/monitoramento/excluir", app.ExcluirMonitoramento)
+
+    // Recarregar templates em desenvolvimento
     if app.Env == "development" {
         mux.HandleFunc("/reload-templates", app.ReloadTemplatesHandler)
     }
@@ -249,6 +288,10 @@ func (app *Application) ReloadTemplatesHandler(w http.ResponseWriter, r *http.Re
 }
 
 func (app *Application) Homepage(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
 	app.renderTemplate(w, r, "index.html", nil)
 }
 
@@ -323,6 +366,3 @@ func (app *Application) serverError(w http.ResponseWriter, r *http.Request, err 
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
-
-
-

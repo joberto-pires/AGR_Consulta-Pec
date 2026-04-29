@@ -1,0 +1,50 @@
+{{template "base.html" .}}
+{{define "content"}}
+<link rel="stylesheet" href="/static/css/pages.css">
+<div class="container-fluid fade-in">
+ 
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+                Análise de Solo
+            </h1>
+            <p class="page-subtitle">{{.TotalRegistros}} análises registradas</p>
+        </div>
+        <button class="btn-primary-agro"
+            hx-get="/analises/novo" hx-target="#sidebar-body" hx-swap="innerHTML"
+            onclick="document.getElementById('sidebar-title').textContent='Nova Análise'; document.getElementById('modal-container').classList.add('show'); document.body.style.overflow='hidden'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nova Análise
+        </button>
+    </div>
+ 
+    <div class="toolbar">
+        <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="search-input" placeholder="Buscar por propriedade, cliente, talhão..."
+                name="busca" value="{{.Busca}}"
+                hx-get="/analises?partial=1"
+                hx-target="#tabela-analises"
+                hx-trigger="keyup changed delay:400ms"
+                hx-include="[name='busca'],[name='status']">
+        </div>
+        <select name="status" class="filter-select"
+            hx-get="/analises?partial=1"
+            hx-target="#tabela-analises"
+            hx-trigger="change"
+            hx-include="[name='busca'],[name='status']">
+            <option value="">Todos os status</option>
+            <option value="pendente"   {{if eq .StatusFiltro "pendente"}}selected{{end}}>Pendente</option>
+            <option value="concluida"  {{if eq .StatusFiltro "concluida"}}selected{{end}}>Concluída</option>
+            <option value="em_analise" {{if eq .StatusFiltro "em_analise"}}selected{{end}}>Em Análise</option>
+        </select>
+    </div>
+ 
+    <div class="data-card" id="tabela-analises">
+        {{template "analises/tabela.html" .}}
+    </div>
+</div>
+{{end}}
+ 
+

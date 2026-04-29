@@ -1,0 +1,96 @@
+{{define "analises/editar_sidebar.html"}}
+<link rel="stylesheet" href="/static/css/pages.css">
+<form hx-post="/analises/salvar" hx-target="body">
+    <input type="hidden" name="id" value="{{.Analise.ID}}">
+ 
+    <div class="form-grid">
+        <div class="form-group full">
+            <label class="form-label">Propriedade *</label>
+            <select name="propriedade_id" class="form-select" required>
+                <option value="">Selecione...</option>
+                {{range .Propriedades}}
+                <option value="{{.ID}}" {{if eq .ID $.Analise.PropriedadeID}}selected{{end}}>{{.Nome}} — {{.ClienteNome}}</option>
+                {{end}}
+            </select>
+        </div>
+ 
+        <div class="form-group">
+            <label class="form-label">Talhão</label>
+            <input type="text" name="talhao" class="form-input" value="{{.Analise.Talhao}}" placeholder="Ex: Talhão 01">
+        </div>
+ 
+        <div class="form-group">
+            <label class="form-label">Data da Amostra</label>
+            <input type="date" name="data_amostra" class="form-input" value="{{.Analise.DataAmostra}}">
+        </div>
+ 
+        <div class="form-group">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="pendente"   {{if eq .Analise.Status "pendente"}}selected{{end}}>Pendente</option>
+                <option value="em_analise" {{if eq .Analise.Status "em_analise"}}selected{{end}}>Em Análise</option>
+                <option value="concluida"  {{if eq .Analise.Status "concluida"}}selected{{end}}>Concluída</option>
+            </select>
+        </div>
+    </div>
+ 
+    <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--primary);margin:1.25rem 0 0.75rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-color)">Parâmetros Analisados</p>
+ 
+    <div class="form-grid">
+        <div class="form-group">
+            <label class="form-label">pH</label>
+            <input type="number" step="0.1" min="0" max="14" name="ph" class="form-input" value="{{.Analise.PH}}" placeholder="6.5">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Matéria Orgânica (%)</label>
+            <input type="number" step="0.01" name="materia_organica" class="form-input" value="{{.Analise.MateriaOrganica}}" placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Nitrogênio (mg/dm³)</label>
+            <input type="number" step="0.01" name="nitrogenio" class="form-input" value="{{.Analise.Nitrogenio}}" placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Fósforo (mg/dm³)</label>
+            <input type="number" step="0.01" name="fosforo" class="form-input" value="{{.Analise.Fosforo}}" placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Potássio (mg/dm³)</label>
+            <input type="number" step="0.01" name="potassio" class="form-input" value="{{.Analise.Potassio}}" placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label class="form-label">CTC (cmolc/dm³)</label>
+            <input type="number" step="0.01" name="ctc" class="form-input" value="{{.Analise.CTC}}" placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Saturação de Bases (%)</label>
+            <input type="number" step="0.1" min="0" max="100" name="saturacao_bases" class="form-input" value="{{.Analise.SaturacaoBases}}" placeholder="0.0">
+        </div>
+    </div>
+ 
+    <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--primary);margin:1.25rem 0 0.75rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-color)">Recomendações</p>
+ 
+    <div class="form-grid">
+        <div class="form-group full">
+            <label class="form-label">Recomendação de Calcário</label>
+            <textarea name="rec_calcario" class="form-textarea" placeholder="Dosagem e tipo de calcário recomendado...">{{.Analise.RecCalcario}}</textarea>
+        </div>
+        <div class="form-group full">
+            <label class="form-label">Recomendação de Adubação</label>
+            <textarea name="rec_adubacao" class="form-textarea" placeholder="NPK, micronutrientes, doses...">{{.Analise.RecAdubacao}}</textarea>
+        </div>
+        <div class="form-group full">
+            <label class="form-label">Plano de Correção</label>
+            <textarea name="plano_correcao" class="form-textarea" placeholder="Etapas do plano de correção do solo...">{{.Analise.PlanoCorrecao}}</textarea>
+        </div>
+    </div>
+ 
+    <div class="form-actions">
+        <button type="button" class="btn-ghost" onclick="closeSidebar()">Cancelar</button>
+        <button type="submit" class="btn-primary-agro">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Salvar
+        </button>
+    </div>
+</form>
+{{end}}
+

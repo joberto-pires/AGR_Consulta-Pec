@@ -1,0 +1,72 @@
+{{define "propriedades/editar_sidebar.html"}}
+<link rel="stylesheet" href="/static/css/pages.css">
+<form hx-post="/propriedades/salvar" hx-target="body">
+    <input type="hidden" name="id" value="{{.Propriedade.ID}}">
+ 
+    <div class="form-grid">
+        <div class="form-group">
+            <label class="form-label">Cliente *</label>
+            <select name="cliente_id" class="form-select" required>
+                <option value="">Selecione...</option>
+                {{range .Clientes}}
+                <option value="{{.ID}}" {{if eq .ID $.Propriedade.ClienteID}}selected{{end}}>{{.Nome}}</option>
+                {{end}}
+            </select>
+        </div>
+ 
+        <div class="form-group">
+            <label class="form-label">Nome da Propriedade *</label>
+            <input type="text" name="nome" class="form-input" value="{{.Propriedade.Nome}}" required placeholder="Ex: Fazenda Santa Maria">
+        </div>
+ 
+        <div class="form-group">
+            <label class="form-label">Área Total (ha)</label>
+            <input type="number" step="0.01" name="hectares" class="form-input" value="{{.Propriedade.Hectares}}" placeholder="0.00">
+        </div>
+ 
+        <div class="form-group">
+            <label class="form-label">Município</label>
+            <input type="text" name="municipio" class="form-input" value="{{.Propriedade.Municipio}}" placeholder="Nome do município">
+        </div>
+ 
+        <div class="form-group">
+            <label class="form-label">Estado</label>
+            <select name="estado" class="form-select">
+                <option value="">UF</option>
+                {{range .Estados}}
+                <option value="{{.}}" {{if eq . $.Propriedade.Estado}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+ 
+        <div class="form-group">
+            <label class="form-label">Coordenadas GPS</label>
+            <input type="text" name="coordenadas" class="form-input" value="{{.Propriedade.Coordenadas}}" placeholder="-15.123, -47.456">
+        </div>
+ 
+        <div class="form-group full">
+            <label class="form-label">Características do Solo</label>
+            <textarea name="caracteristica_solo" class="form-textarea" placeholder="Textura, drenagem, relevo...">{{.Propriedade.CaracteristicaSolo}}</textarea>
+        </div>
+ 
+        <div class="form-group full">
+            <label class="form-label">Infraestrutura Disponível</label>
+            <textarea name="infraestrutura" class="form-textarea" placeholder="Silos, galpões, sistemas de irrigação...">{{.Propriedade.Infraestrutura}}</textarea>
+        </div>
+ 
+        <div class="form-group full">
+            <label class="form-label">Histórico de Culturas</label>
+            <textarea name="historico_culturas" class="form-textarea" placeholder="Culturas anteriores por safra...">{{.Propriedade.HistoricoCulturas}}</textarea>
+        </div>
+    </div>
+ 
+    <div class="form-actions">
+        <button type="button" class="btn-ghost" onclick="closeSidebar()">Cancelar</button>
+        <button type="submit" class="btn-primary-agro">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salvar
+        </button>
+    </div>
+</form>
+{{end}}
+
